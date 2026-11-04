@@ -4,24 +4,91 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+
+# Only one Pages deployment at a time; a newer run cancels an older one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
-    timeout-minutes: 60
+    name: test (${{ matrix.project }})
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [api, chromium]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+    - name: Install dependencies
+      run: npm ci
+    - name: Type check
+      if: matrix.project == 'api'
+      run: npm run typecheck
+    - name: Install Playwright browser
+      if: matrix.project != 'api'
+      run: npx playwright install --with-deps chromium
+    - name: Run Playwright tests
+      run: npx playwright test --project=${{ matrix.project }}
+    - name: Upload blob report
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: blob-report-${{ matrix.project }}
+        path: blob-report/
+        retention-days: 7
+
+  report:
+    name: merge HTML report
+    if: ${{ !cancelled() }}
+    needs: test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: lts/*
+        node-version: 22
+        cache: npm
     - name: Install dependencies
       run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: always()
+    - name: Download blob reports
+      uses: actions/download-artifact@v4
+      with:
+        path: all-blob-reports
+        pattern: blob-report-*
+        merge-multiple: true
+    - name: Merge into one HTML report
+      run: npx playwright merge-reports --reporter html ./all-blob-reports
+    - name: Upload HTML report (download from the run page)
+      uses: actions/upload-artifact@v4
       with:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
+    - name: Upload report for GitHub Pages
+      if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: playwright-report/
+
+  deploy:
+    name: publish report to GitHub Pages
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main' }}
+    needs: report
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
