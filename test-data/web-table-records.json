@@ -1,0 +1,26 @@
+[
+  {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "jane.doe@example.com",
+    "age": "30",
+    "salary": "5000",
+    "department": "QA"
+  },
+  {
+    "firstName": "Omar",
+    "lastName": "Khan",
+    "email": "omar.khan@example.com",
+    "age": "42",
+    "salary": "8200",
+    "department": "Engineering"
+  },
+  {
+    "firstName": "Li",
+    "lastName": "Wei",
+    "email": "li.wei@example.com",
+    "age": "19",
+    "salary": "1500",
+    "department": "Support"
+  }
+]
