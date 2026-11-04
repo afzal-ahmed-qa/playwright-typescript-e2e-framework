@@ -1,43 +1,50 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
-// Define a test case
-test('test', async ({ page }) => {
-  // Navigate to the demo website
-  await page.goto('https://demoqa.com/');
-  await expect(page).toHaveURL('https://demoqa.com/');
-  
-  // Click on the first element found by the 'path' locator
-  await page.locator('path').first().click();
-  
-  // Right-click on the 'Buttons' text
-  await page.getByText('Buttons').click({
-    button: 'right'
+/**
+ * DemoQA "Buttons" page: https://demoqa.com/buttons
+ * Verifies that each button responds to its matching mouse interaction
+ * (double click, right click, single click) with the correct message.
+ */
+
+async function blockAds(page: Page) {
+  // demoqa.com serves heavy third-party ads that slow down and destabilise tests.
+  await page.route(/googlesyndication|doubleclick|adservice|adplus|pubads/, (route) => route.abort());
+}
+
+test.describe('Buttons page', () => {
+  test.beforeEach(async ({ page }) => {
+    await blockAds(page);
+    await page.goto('/buttons', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/buttons$/);
   });
-  
-  // Click on the list item that contains the text 'Buttons'
-  await page.getByRole('listitem').filter({ hasText: 'Buttons' }).click();
-  
-  // Click on the button with the name 'Double Click Me'
-  await page.getByRole('button', { name: 'Double Click Me' }).click();
-  await expect(page.getByRole('button', { name: 'Double Click Me' })).toBeVisible();
-  
-  // Right-click on the button with the name 'Right Click Me'
-  await page.getByRole('button', { name: 'Right Click Me' }).click({
-    button: 'right'
+
+  test('double click shows the double click message', async ({ page }) => {
+    await page.getByRole('button', { name: 'Double Click Me' }).dblclick();
+
+    await expect(page.locator('#doubleClickMessage')).toHaveText('You have done a double click');
+    await expect(page.locator('#rightClickMessage')).toBeHidden();
+    await expect(page.locator('#dynamicClickMessage')).toBeHidden();
   });
-  await expect(page.getByRole('button', { name: 'Right Click Me' })).toBeVisible();
-  
-  // Click again on the button with the name 'Double Click Me'
-  await page.getByRole('button', { name: 'Double Click Me' }).click();
-  await expect(page.getByRole('button', { name: 'Double Click Me' })).toBeVisible();
-  
-  // Click on the button with the exact name 'Click Me'
-  await page.getByRole('button', { name: 'Click Me', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Click Me', exact: true })).toBeVisible();
-  
-  // Verify that the text 'You have done a dynamic click' is visible
-  await expect(page.getByText('You have done a dynamic click')).toBeVisible();
-  
-  // Pause the page for debugging
-  await page.pause();
+
+  test('right click shows the right click message', async ({ page }) => {
+    await page.getByRole('button', { name: 'Right Click Me' }).click({ button: 'right' });
+
+    await expect(page.locator('#rightClickMessage')).toHaveText('You have done a right click');
+    await expect(page.locator('#doubleClickMessage')).toBeHidden();
+    await expect(page.locator('#dynamicClickMessage')).toBeHidden();
+  });
+
+  test('single click shows the dynamic click message', async ({ page }) => {
+    await page.getByRole('button', { name: 'Click Me', exact: true }).click();
+
+    await expect(page.locator('#dynamicClickMessage')).toHaveText('You have done a dynamic click');
+    await expect(page.locator('#doubleClickMessage')).toBeHidden();
+    await expect(page.locator('#rightClickMessage')).toBeHidden();
+  });
+
+  test('a single click on "Double Click Me" shows no message', async ({ page }) => {
+    await page.getByRole('button', { name: 'Double Click Me' }).click();
+
+    await expect(page.locator('#doubleClickMessage')).toBeHidden();
+  });
 });
