@@ -1,13 +1,13 @@
 import type { Locator, Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { BasePage } from '../BasePage';
 
 export class LoginPage extends BasePage {
   protected readonly path = '/login';
 
-  readonly userName: Locator;
-  readonly password: Locator;
-  readonly loginButton: Locator;
   readonly errorMessage: Locator;
+  private readonly userName: Locator;
+  private readonly password: Locator;
+  private readonly loginButton: Locator;
 
   constructor(page: Page) {
     super(page);

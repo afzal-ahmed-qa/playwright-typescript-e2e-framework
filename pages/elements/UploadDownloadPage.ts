@@ -1,12 +1,12 @@
 import type { Download, Locator, Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { BasePage } from '../BasePage';
 
 export class UploadDownloadPage extends BasePage {
   protected readonly path = '/upload-download';
 
-  readonly downloadButton: Locator;
-  readonly uploadInput: Locator;
   readonly uploadedFilePath: Locator;
+  private readonly downloadButton: Locator;
+  private readonly uploadInput: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -20,8 +20,8 @@ export class UploadDownloadPage extends BasePage {
   }
 
   async download(): Promise<Download> {
-    const downloadPromise = this.page.waitForEvent('download');
+    const download = this.page.waitForEvent('download');
     await this.downloadButton.click();
-    return downloadPromise;
+    return download;
   }
 }

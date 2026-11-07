@@ -1,97 +1,84 @@
 import { test, expect } from '../../../fixtures';
-import records from '../../../test-data/web-table-records.json';
-import type { WebTableRecord } from '../../../pages/WebTablesPage';
+import { tableRow } from '../../../pages/elements/WebTablesPage';
+import { buildEmployee, type Employee } from '../../../test-data/factories';
+import employees from '../../../test-data/web-table-records.json';
 
-const toCells = (r: WebTableRecord) => [r.firstName, r.lastName, r.age, r.email, r.salary, r.department];
-
-test.describe('Elements › Web Tables', () => {
+test.describe('Web Tables', () => {
   test.beforeEach(async ({ webTablesPage }) => {
     await webTablesPage.open();
   });
 
-  test('TC-WT-01 default data is shown', async ({ webTablesPage }) => {
-    await expect(webTablesPage.rows).toHaveCount(3);
-    await expect(webTablesPage.rows.locator('td:first-child')).toHaveText(['Cierra', 'Alden', 'Kierra']);
+  test('TC-WT-01 the table starts with three employees', async ({ webTablesPage }) => {
+    await expect(webTablesPage.firstNames).toHaveText(['Cierra', 'Alden', 'Kierra']);
   });
 
-  // Data-driven: one test per record in test-data/web-table-records.json
-  for (const record of records as WebTableRecord[]) {
-    test(`TC-WT-02 add a new record: ${record.firstName} ${record.lastName}`, { tag: '@smoke' }, async ({ webTablesPage }) => {
-      await webTablesPage.addRecord(record);
+  // Data-driven: one test per row in test-data/web-table-records.json
+  for (const employee of employees as Employee[]) {
+    test(`TC-WT-02 add ${employee.firstName} ${employee.lastName} (${employee.department})`, async ({
+      webTablesPage,
+    }) => {
+      await webTablesPage.addEmployee(employee);
 
-      await expect(webTablesPage.modal).toBeHidden();
+      await expect(webTablesPage.form.root).toBeHidden();
       await expect(webTablesPage.rows).toHaveCount(4);
-      await expect(webTablesPage.rowCells(record.email)).toHaveText(toCells(record));
+      await expect(webTablesPage.cellsFor(employee.email)).toHaveText(tableRow(employee));
     });
   }
 
-  test('TC-WT-03 required fields are validated', async ({ webTablesPage }) => {
+  test('TC-WT-03 every field is required', async ({ webTablesPage }) => {
     await webTablesPage.openAddForm();
-    await webTablesPage.submitButton.click();
+    await webTablesPage.form.submit();
 
-    await expect(webTablesPage.modal).toBeVisible();
-    for (const field of [
-      webTablesPage.firstName,
-      webTablesPage.lastName,
-      webTablesPage.email,
-      webTablesPage.age,
-      webTablesPage.salary,
-      webTablesPage.department,
-    ]) {
+    await expect(webTablesPage.form.root).toBeVisible();
+    for (const field of webTablesPage.form.allFields) {
       await expect(field).toBeInvalid();
     }
-    await expect(webTablesPage.rows).toHaveCount(3);
   });
 
-  test.describe('TC-WT-04 boundary: age', () => {
-    const base = records[0] as WebTableRecord;
+  test.describe('TC-WT-04 age field boundaries', () => {
+    test('letters are rejected', async ({ webTablesPage }) => {
+      await webTablesPage.addEmployee(buildEmployee({ age: 'abc' }));
 
-    test('non-numeric age is rejected', async ({ webTablesPage }) => {
-      await webTablesPage.addRecord({ ...base, age: 'abc' });
-
-      await expect(webTablesPage.modal).toBeVisible();
-      await expect(webTablesPage.age).toBeInvalid();
+      await expect(webTablesPage.form.root).toBeVisible();
+      await expect(webTablesPage.form.age).toBeInvalid();
     });
 
-    test('two-digit age (99) is accepted', async ({ webTablesPage }) => {
-      await webTablesPage.addRecord({ ...base, age: '99' });
+    test('99 is accepted', async ({ webTablesPage }) => {
+      const employee = buildEmployee({ age: '99' });
+      await webTablesPage.addEmployee(employee);
 
-      await expect(webTablesPage.modal).toBeHidden();
-      await expect(webTablesPage.rowCells(base.email).nth(2)).toHaveText('99');
+      await expect(webTablesPage.cellsFor(employee.email).nth(2)).toHaveText('99');
     });
 
-    test('age is limited to two digits (typing 100 gives 10)', async ({ webTablesPage }) => {
+    test('a third digit cannot be typed', async ({ webTablesPage }) => {
       await webTablesPage.openAddForm();
-      // pressSequentially types like a user, so the maxlength="2" limit applies.
-      await webTablesPage.age.pressSequentially('100');
+      await webTablesPage.form.typeAge('100');
 
-      await expect(webTablesPage.age).toHaveValue('10');
+      await expect(webTablesPage.form.age).toHaveValue('10');
     });
   });
 
-  test('TC-WT-05 edit a record', async ({ webTablesPage }) => {
-    await webTablesPage.edit('cierra@example.com', { salary: '12345' });
+  test('TC-WT-05 editing a row updates it in place', async ({ webTablesPage }) => {
+    await webTablesPage.editEmployee('cierra@example.com', { salary: '12345' });
 
-    await expect(webTablesPage.modal).toBeHidden();
-    await expect(webTablesPage.rowCells('cierra@example.com').nth(4)).toHaveText('12345');
+    await expect(webTablesPage.cellsFor('cierra@example.com').nth(4)).toHaveText('12345');
   });
 
-  test('TC-WT-06 delete a record', async ({ webTablesPage }) => {
-    await webTablesPage.delete('alden@example.com');
+  test('TC-WT-06 deleting a row removes only that row', async ({ webTablesPage }) => {
+    await webTablesPage.deleteEmployee('alden@example.com');
 
-    await expect(webTablesPage.row('alden@example.com')).toHaveCount(0);
-    await expect(webTablesPage.rows).toHaveCount(2);
+    await expect(webTablesPage.rowFor('alden@example.com')).toHaveCount(0);
+    await expect(webTablesPage.firstNames).toHaveText(['Cierra', 'Kierra']);
   });
 
-  test('TC-WT-07 search filters the table', async ({ webTablesPage }) => {
+  test('TC-WT-07 search filters as you type', async ({ webTablesPage }) => {
     await webTablesPage.search('Kierra');
-    await expect(webTablesPage.rows).toHaveCount(1);
-    await expect(webTablesPage.rows.first()).toContainText('Kierra');
+    await expect(webTablesPage.firstNames).toHaveText(['Kierra']);
 
-    await webTablesPage.search('zzz');
+    await webTablesPage.search('nobody-matches-this');
     await expect(webTablesPage.rows).toHaveCount(0);
 
-    await webTablesPage.search('');
+    await webTablesPage.clearSearch();
     await expect(webTablesPage.rows).toHaveCount(3);
   });
 });

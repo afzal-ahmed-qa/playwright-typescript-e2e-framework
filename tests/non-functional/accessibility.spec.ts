@@ -1,47 +1,32 @@
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect } from '../../fixtures';
 
-/**
- * Critical axe rules DemoQA already breaks, tracked in docs/defects.md.
- * - label (DEF-001): <label> elements are not linked to their inputs.
- */
-const KNOWN_VIOLATIONS = ['label'];
+// Critical issues already logged in docs/defects.md. Anything else makes the scan fail.
+const KNOWN_VIOLATIONS = ['label']; // DEF-001
 
-test.describe('Non-functional › Accessibility (Text Box)', () => {
+test.describe('Accessibility: Text Box', { tag: '@a11y' }, () => {
   test.beforeEach(async ({ textBoxPage }) => {
     await textBoxPage.open();
   });
 
-  test('TC-NF-02 form can be completed with the keyboard only', { tag: '@a11y' }, async ({ textBoxPage, page }) => {
-    await textBoxPage.fullName.focus();
-    await page.keyboard.type('Keyboard User');
-    await page.keyboard.press('Tab');
-    await expect(textBoxPage.email).toBeFocused();
-    await page.keyboard.type('keyboard@example.com');
-    await page.keyboard.press('Tab');
-    await expect(textBoxPage.currentAddress).toBeFocused();
-    await page.keyboard.press('Tab');
-    await expect(textBoxPage.permanentAddress).toBeFocused();
-    await page.keyboard.press('Tab');
-    await expect(textBoxPage.submitButton).toBeFocused();
-    await page.keyboard.press('Enter');
+  test('TC-NF-02 the form can be completed with the keyboard alone', async ({ textBoxPage }) => {
+    await textBoxPage.submitDetailsWithKeyboard({ fullName: 'Keyboard User', email: 'keyboard@example.com' });
 
     await expect(textBoxPage.outputName).toHaveText('Name:Keyboard User');
+    await expect(textBoxPage.outputEmail).toHaveText('Email:keyboard@example.com');
   });
 
-  test('TC-NF-02 automated axe scan has no critical violations', { tag: '@a11y' }, async ({ page }, testInfo) => {
-    const results = await new AxeBuilder({ page })
-      .include('#userForm')
-      .withTags(['wcag2a', 'wcag2aa'])
-      .analyze();
+  test('TC-NF-02 axe finds no new critical WCAG issues', async ({ page }, testInfo) => {
+    const results = await new AxeBuilder({ page }).include('#userForm').withTags(['wcag2a', 'wcag2aa']).analyze();
 
-    // Attach the full report to the HTML report for review.
-    await testInfo.attach('axe-results', { body: JSON.stringify(results.violations, null, 2), contentType: 'application/json' });
+    await testInfo.attach('axe-violations.json', {
+      body: JSON.stringify(results.violations, null, 2),
+      contentType: 'application/json',
+    });
 
-    // Known, already-reported issues are allowed so the test catches NEW regressions.
-    const critical = results.violations
-      .filter((v) => v.impact === 'critical')
-      .filter((v) => !KNOWN_VIOLATIONS.includes(v.id));
-    expect(critical.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+    const newCritical = results.violations
+      .filter((v) => v.impact === 'critical' && !KNOWN_VIOLATIONS.includes(v.id))
+      .map((v) => `${v.id}: ${v.help}`);
+    expect(newCritical).toEqual([]);
   });
 });

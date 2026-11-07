@@ -1,7 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { BasePage } from '../BasePage';
 
-export interface TextBoxData {
+export interface ContactDetails {
   fullName?: string;
   email?: string;
   currentAddress?: string;
@@ -38,15 +38,24 @@ export class TextBoxPage extends BasePage {
     this.outputPermanentAddress = this.output.locator('#permanentAddress');
   }
 
-  async fill(data: TextBoxData): Promise<void> {
-    if (data.fullName !== undefined) await this.fullName.fill(data.fullName);
-    if (data.email !== undefined) await this.email.fill(data.email);
-    if (data.currentAddress !== undefined) await this.currentAddress.fill(data.currentAddress);
-    if (data.permanentAddress !== undefined) await this.permanentAddress.fill(data.permanentAddress);
+  async submitDetails(details: ContactDetails = {}): Promise<void> {
+    if (details.fullName !== undefined) await this.fullName.fill(details.fullName);
+    if (details.email !== undefined) await this.email.fill(details.email);
+    if (details.currentAddress !== undefined) await this.currentAddress.fill(details.currentAddress);
+    if (details.permanentAddress !== undefined) await this.permanentAddress.fill(details.permanentAddress);
+    await this.submitButton.click();
   }
 
-  async submit(data: TextBoxData = {}): Promise<void> {
-    await this.fill(data);
-    await this.submitButton.click();
+  /** Fills the form using only the keyboard: type, Tab to the next field, Enter to submit. */
+  async submitDetailsWithKeyboard(details: Required<Pick<ContactDetails, 'fullName' | 'email'>>): Promise<void> {
+    const keyboard = this.page.keyboard;
+    await this.fullName.focus();
+    await keyboard.type(details.fullName);
+    await keyboard.press('Tab');
+    await keyboard.type(details.email);
+    await keyboard.press('Tab'); // current address
+    await keyboard.press('Tab'); // permanent address
+    await keyboard.press('Tab'); // submit
+    await keyboard.press('Enter');
   }
 }

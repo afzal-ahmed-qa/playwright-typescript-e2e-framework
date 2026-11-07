@@ -1,5 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { BasePage } from '../BasePage';
 
 export class CheckBoxPage extends BasePage {
   protected readonly path = '/checkbox';
@@ -13,20 +13,19 @@ export class CheckBoxPage extends BasePage {
     this.selectedItems = this.result.locator('.text-success');
   }
 
-  /** Checkbox for a tree node, e.g. checkbox('Desktop'). */
-  checkbox(name: string): Locator {
-    return this.page.getByRole('checkbox', { name: `Select ${name}` });
+  checkbox(node: string): Locator {
+    return this.page.getByRole('checkbox', { name: `Select ${node}` });
   }
 
   node(name: string): Locator {
     return this.page.getByRole('treeitem').filter({ has: this.checkbox(name) });
   }
 
-  async expand(name: string): Promise<void> {
-    await this.node(name).locator('.rc-tree-switcher').click();
+  async expand(node: string): Promise<void> {
+    await this.node(node).locator('.rc-tree-switcher').click();
   }
 
-  async toggle(name: string): Promise<void> {
-    await this.checkbox(name).click();
+  async toggle(node: string): Promise<void> {
+    await this.checkbox(node).click();
   }
 }

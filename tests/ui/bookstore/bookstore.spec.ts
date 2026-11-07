@@ -1,42 +1,37 @@
 import { test, expect } from '../../../fixtures';
 
-test.describe('Book Store › Login', () => {
+test.describe('Book Store login', () => {
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.open();
   });
 
-  // The test user is created through the API (see the `testUser` fixture) and
-  // deleted afterwards. That makes this both TC-BS-01 and the hybrid TC-HY-01.
-  test('TC-BS-01 / TC-HY-01 log in with a user created via the API', { tag: '@smoke' }, async ({
+  test('TC-BS-01 / TC-HY-01 user created via the API can log in', { tag: '@smoke' }, async ({
     loginPage,
     profilePage,
-    page,
     testUser,
   }) => {
     await loginPage.login(testUser.userName, testUser.password);
 
-    await expect(page).toHaveURL(/\/profile$/);
-    await expect(profilePage.userNameValue).toHaveText(testUser.userName);
+    await profilePage.shouldBeOpen();
+    await expect(profilePage.userName).toHaveText(testUser.userName);
   });
 
-  test('TC-BS-02 log in with a wrong password', async ({ loginPage, page, testUser }) => {
+  test('TC-BS-02 wrong password is refused', async ({ loginPage, testUser }) => {
     await loginPage.login(testUser.userName, 'Wrong@Password1');
 
     await expect(loginPage.errorMessage).toHaveText('Invalid username or password!');
-    await expect(page).toHaveURL(/\/login$/);
+    await loginPage.shouldBeOpen();
   });
 });
 
-test.describe('Book Store › Books', () => {
-  test('TC-BS-03 search the book list', async ({ booksPage }) => {
-    await booksPage.open();
-    await expect(booksPage.bookTitles.first()).toBeVisible();
+test('TC-BS-03 searching the store filters by title', async ({ bookStorePage }) => {
+  await bookStorePage.open();
+  await expect(bookStorePage.bookTitles.first()).toBeVisible();
 
-    await booksPage.search('Git');
+  await bookStorePage.search('Git');
 
-    await expect(booksPage.bookTitles).not.toHaveCount(0);
-    for (const title of await booksPage.bookTitles.allInnerTexts()) {
-      expect(title).toContain('Git');
-    }
-  });
+  await expect(bookStorePage.bookTitles).not.toHaveCount(0);
+  for (const title of await bookStorePage.bookTitles.allInnerTexts()) {
+    expect(title).toContain('Git');
+  }
 });

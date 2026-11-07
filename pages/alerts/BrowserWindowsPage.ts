@@ -1,22 +1,22 @@
 import type { Locator, Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { BasePage } from '../BasePage';
+import { SamplePage } from './SamplePage';
 
 export class BrowserWindowsPage extends BasePage {
   protected readonly path = '/browser-windows';
 
-  readonly newTabButton: Locator;
+  private readonly newTabButton: Locator;
 
   constructor(page: Page) {
     super(page);
     this.newTabButton = page.getByRole('button', { name: 'New Tab' });
   }
 
-  /** Clicks "New Tab" and returns the tab it opens. */
-  async openNewTab(): Promise<Page> {
-    const tabPromise = this.page.context().waitForEvent('page');
+  async openNewTab(): Promise<SamplePage> {
+    const newPage = this.page.context().waitForEvent('page');
     await this.newTabButton.click();
-    const tab = await tabPromise;
+    const tab = await newPage;
     await tab.waitForLoadState('domcontentloaded');
-    return tab;
+    return new SamplePage(tab);
   }
 }

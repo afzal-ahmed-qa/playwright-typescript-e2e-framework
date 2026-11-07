@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
-import { BasePage } from './BasePage';
+import { BasePage } from '../BasePage';
 
+/** Buttons on this page change state roughly 5 seconds after load. */
 export class DynamicPropertiesPage extends BasePage {
   protected readonly path = '/dynamic-properties';
 

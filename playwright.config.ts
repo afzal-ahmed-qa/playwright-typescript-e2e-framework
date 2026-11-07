@@ -33,6 +33,8 @@ export default defineConfig({
     /* Step-by-step trace (DOM, network, console) whenever a test fails. */
     trace: 'retain-on-failure',
     actionTimeout: 15_000,
+    /* SLOW_MO=500 with --headed slows every action down so a run can be watched. */
+    launchOptions: { slowMo: Number(process.env.SLOW_MO ?? 0) },
     navigationTimeout: 30_000,
   },
 

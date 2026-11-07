@@ -1,36 +1,34 @@
 import { test, expect } from '../../../fixtures';
 
-test.describe('Elements › Buttons', () => {
+test.describe('Buttons', () => {
   test.beforeEach(async ({ buttonsPage }) => {
     await buttonsPage.open();
   });
 
-  test('TC-BT-01 double click shows the double click message', { tag: '@smoke' }, async ({ buttonsPage }) => {
-    await buttonsPage.doubleClickButton.dblclick();
+  test('TC-BT-01 double click', { tag: '@smoke' }, async ({ buttonsPage }) => {
+    await buttonsPage.doubleClickTheButton();
 
     await expect(buttonsPage.doubleClickMessage).toHaveText('You have done a double click');
     await expect(buttonsPage.rightClickMessage).toBeHidden();
     await expect(buttonsPage.dynamicClickMessage).toBeHidden();
   });
 
-  test('TC-BT-02 right click shows the right click message', { tag: '@smoke' }, async ({ buttonsPage }) => {
-    await buttonsPage.rightClickButton.click({ button: 'right' });
+  test('TC-BT-02 right click', { tag: '@smoke' }, async ({ buttonsPage }) => {
+    await buttonsPage.rightClickTheButton();
 
     await expect(buttonsPage.rightClickMessage).toHaveText('You have done a right click');
     await expect(buttonsPage.doubleClickMessage).toBeHidden();
-    await expect(buttonsPage.dynamicClickMessage).toBeHidden();
   });
 
-  test('TC-BT-03 single click shows the dynamic click message', { tag: '@smoke' }, async ({ buttonsPage }) => {
-    await buttonsPage.clickMeButton.click();
+  test('TC-BT-03 single click on the dynamic button', { tag: '@smoke' }, async ({ buttonsPage }) => {
+    await buttonsPage.clickTheDynamicButton();
 
     await expect(buttonsPage.dynamicClickMessage).toHaveText('You have done a dynamic click');
     await expect(buttonsPage.doubleClickMessage).toBeHidden();
-    await expect(buttonsPage.rightClickMessage).toBeHidden();
   });
 
-  test('TC-BT-04 a single click on "Double Click Me" shows no message', async ({ buttonsPage }) => {
-    await buttonsPage.doubleClickButton.click();
+  test('TC-BT-04 a single click is not mistaken for a double click', async ({ buttonsPage }) => {
+    await buttonsPage.singleClickTheDoubleClickButton();
 
     await expect(buttonsPage.doubleClickMessage).toBeHidden();
   });

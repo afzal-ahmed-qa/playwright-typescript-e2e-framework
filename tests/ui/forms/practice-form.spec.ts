@@ -1,140 +1,85 @@
-import path from 'node:path';
 import { test, expect } from '../../../fixtures';
-import type { StudentData } from '../../../pages/PracticeFormPage';
+import { buildStudent } from '../../../test-data/factories';
 
-const PICTURE = path.join(__dirname, '../../../test-data/files/sample.txt');
-
-const requiredOnly: StudentData = {
-  firstName: 'John',
-  lastName: 'Smith',
-  gender: 'Male',
-  mobile: '0123456789',
-};
-
-test.describe('Forms › Practice Form', () => {
+test.describe('Practice Form', () => {
   test.beforeEach(async ({ practiceFormPage }) => {
     await practiceFormPage.open();
   });
 
-  test('TC-PF-01 submit with only required fields', { tag: '@smoke' }, async ({ practiceFormPage: form }) => {
-    await form.fillForm(requiredOnly);
-    await form.submit();
+  test('TC-PF-01 registering with just the required fields', { tag: '@smoke' }, async ({ practiceFormPage }) => {
+    const student = buildStudent();
 
-    await expect(form.modalTitle).toHaveText('Thanks for submitting the form');
-    await expect(form.summaryValue('Student Name')).toHaveText('John Smith');
-    await expect(form.summaryValue('Gender')).toHaveText('Male');
-    await expect(form.summaryValue('Mobile')).toHaveText('0123456789');
+    await practiceFormPage.register(student);
+
+    const { summary } = practiceFormPage;
+    await expect(summary.title).toHaveText('Thanks for submitting the form');
+    await expect(summary.valueFor('Student Name')).toHaveText(`${student.firstName} ${student.lastName}`);
+    await expect(summary.valueFor('Gender')).toHaveText(student.gender);
+    await expect(summary.valueFor('Mobile')).toHaveText(student.mobile);
   });
 
-  test('TC-PF-01 close button closes the confirmation modal', async ({ practiceFormPage: form }) => {
-    test.fail(true, 'Known defect DEF-002: Close throws "findDOMNode is not a function" (docs/defects.md)');
+  test('TC-PF-01 the Close button dismisses the confirmation', async ({ practiceFormPage }) => {
+    test.fail(true, 'DEF-002: Close throws "findDOMNode is not a function" and the modal stays open');
 
-    await form.fillForm(requiredOnly);
-    await form.submit();
-    await expect(form.modal).toBeVisible();
+    await practiceFormPage.register(buildStudent());
+    await practiceFormPage.summary.close();
 
-    await form.closeModalButton.click();
-
-    await expect(form.modal).toBeHidden({ timeout: 3_000 });
+    await expect(practiceFormPage.summary.root).toBeHidden({ timeout: 3_000 });
   });
 
-  test('TC-PF-01 Escape closes the confirmation modal', async ({ practiceFormPage: form, page }) => {
-    await form.fillForm(requiredOnly);
-    await form.submit();
-    await expect(form.modal).toBeVisible();
+  test('TC-PF-01 Escape dismisses the confirmation', async ({ practiceFormPage }) => {
+    await practiceFormPage.register(buildStudent());
+    await practiceFormPage.summary.closeWithEscape();
 
-    await page.keyboard.press('Escape');
-
-    await expect(form.modal).toBeHidden();
+    await expect(practiceFormPage.summary.root).toBeHidden();
   });
 
-  test('TC-PF-02 submit with all fields', async ({ practiceFormPage: form }) => {
-    const student: StudentData = {
-      firstName: 'Maria',
-      lastName: 'Garcia',
-      email: 'maria.garcia@example.com',
-      gender: 'Female',
-      mobile: '9876543210',
-      dateOfBirth: { day: 15, month: 'May', year: 1990 },
-      subjects: ['Maths', 'English'],
-      hobbies: ['Sports', 'Reading'],
-      picturePath: PICTURE,
-      currentAddress: '1 Main Street, Springfield',
-      state: 'NCR',
-      city: 'Delhi',
-    };
+  // TC-PF-02 (every field filled in) is covered by the E2E-03 student registration journey.
 
-    await form.fillForm(student);
-    await form.submit();
+  test('TC-PF-03 required fields are enforced', async ({ practiceFormPage }) => {
+    await practiceFormPage.submit();
 
-    await expect(form.modalTitle).toHaveText('Thanks for submitting the form');
-    const expected: Record<string, string | RegExp> = {
-      'Student Name': 'Maria Garcia',
-      'Student Email': 'maria.garcia@example.com',
-      Gender: 'Female',
-      Mobile: '9876543210',
-      'Date of Birth': '15 May,1990',
-      Subjects: 'Maths, English',
-      Hobbies: 'Sports, Reading',
-      Picture: 'sample.txt',
-      Address: '1 Main Street, Springfield',
-      'State and City': 'NCR Delhi',
-    };
-    for (const [label, value] of Object.entries(expected)) {
-      await expect.soft(form.summaryValue(label), label).toHaveText(value);
-    }
+    await expect(practiceFormPage.summary.root).toBeHidden();
+    await expect(practiceFormPage.firstName).toBeInvalid();
+    await expect(practiceFormPage.lastName).toBeInvalid();
+    await expect(practiceFormPage.genderRadio('Male')).toBeInvalid();
+    await expect(practiceFormPage.mobile).toBeInvalid();
+    await expect(practiceFormPage.email).not.toBeInvalid();
   });
 
-  test('TC-PF-03 required fields are validated', async ({ practiceFormPage: form }) => {
-    await form.submit();
+  test.describe('TC-PF-04 mobile number boundaries', () => {
+    for (const [description, mobile] of [
+      ['9 digits', '012345678'],
+      ['letters', 'abcdefghij'],
+    ]) {
+      test(`rejects ${description}`, async ({ practiceFormPage }) => {
+        await practiceFormPage.register(buildStudent({ mobile }));
 
-    await expect(form.modal).toBeHidden();
-    await expect(form.firstName).toBeInvalid();
-    await expect(form.lastName).toBeInvalid();
-    await expect(form.genderRadio('Male')).toBeInvalid();
-    await expect(form.mobile).toBeInvalid();
-    // Optional field stays valid
-    await expect(form.email).not.toBeInvalid();
-  });
-
-  test.describe('TC-PF-04 boundary: mobile number', () => {
-    const rejected = [
-      { case: '9 digits', mobile: '012345678' },
-      { case: 'letters', mobile: 'abcdefghij' },
-    ];
-
-    for (const { case: name, mobile } of rejected) {
-      test(`rejects ${name} (${mobile})`, async ({ practiceFormPage: form }) => {
-        await form.fillForm({ ...requiredOnly, mobile });
-        await form.submit();
-
-        await expect(form.mobile).toBeInvalid();
-        await expect(form.modal).toBeHidden();
+        await expect(practiceFormPage.mobile).toBeInvalid();
+        await expect(practiceFormPage.summary.root).toBeHidden();
       });
     }
 
-    test('accepts exactly 10 digits', async ({ practiceFormPage: form }) => {
-      await form.fillForm({ ...requiredOnly, mobile: '0123456789' });
-      await form.submit();
+    test('accepts exactly 10 digits', async ({ practiceFormPage }) => {
+      await practiceFormPage.register(buildStudent({ mobile: '0123456789' }));
 
-      await expect(form.modal).toBeVisible();
+      await expect(practiceFormPage.summary.root).toBeVisible();
     });
 
-    test('stops typing after 10 digits', async ({ practiceFormPage: form }) => {
-      // pressSequentially types like a user, so the maxlength="10" limit applies.
-      await form.mobile.pressSequentially('01234567890');
+    test('ignores an 11th digit', async ({ practiceFormPage }) => {
+      await practiceFormPage.typeMobile('01234567890');
 
-      await expect(form.mobile).toHaveValue('0123456789');
+      await expect(practiceFormPage.mobile).toHaveValue('0123456789');
     });
   });
 
-  test('TC-PF-05 city depends on state', async ({ practiceFormPage: form, page }) => {
-    await expect(form.cityInput).toBeDisabled();
+  test('TC-PF-05 city list depends on the chosen state', async ({ practiceFormPage }) => {
+    await expect(practiceFormPage.cityInput).toBeDisabled();
 
-    await form.chooseFromSelect(form.stateInput, 'NCR');
-    await expect(form.cityInput).toBeEnabled();
+    await practiceFormPage.selectState('NCR');
+    await practiceFormPage.openCityDropdown();
 
-    await form.cityInput.click();
-    await expect(page.getByRole('option')).toHaveText(['Delhi', 'Gurgaon', 'Noida']);
+    await expect(practiceFormPage.cityInput).toBeEnabled();
+    await expect(practiceFormPage.dropdownOptions).toHaveText(['Delhi', 'Gurgaon', 'Noida']);
   });
 });
