@@ -5,172 +5,154 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 [![Test Report](https://img.shields.io/badge/Test%20Report-live-blue?logo=githubpages&logoColor=white)](https://afzal-ahmed-qa.github.io/playwrightE2eTests/)
 
-📊 **[View the latest test report](https://afzal-ahmed-qa.github.io/playwrightE2eTests/)**, with a video, a screenshot and full steps for every test.
+UI, API and end-to-end tests for [demoqa.com](https://demoqa.com), written in TypeScript with
+Playwright and the Page Object Model.
 
-An end-to-end test automation framework for [demoqa.com](https://demoqa.com), built with
-**Playwright** and **TypeScript** using the **Page Object Model**. It covers UI, API,
-hybrid API + UI, visual regression and accessibility testing. It runs on Chrome (Chromium)
-locally and on every push in GitHub Actions.
+**[Latest test report →](https://afzal-ahmed-qa.github.io/playwrightE2eTests/)** (video and screenshot for every test, published from CI)
 
-Every automated test traces back to a written manual test case. The approach is
-*plan → run manually → automate*.
+I wrote the [test plan](docs/manual-test-plan.md) first and ran every case by hand before
+automating it. That's how the [defects](docs/defects.md) listed below were found, and why each
+automated test starts with the ID of the manual case it covers.
 
----
+## What's covered
 
-## Highlights
-
-- **Page Object Model.** One class per page in [`pages/`](pages). Tests describe *what* to check and page objects know *how* to interact with the page.
-- **Custom fixtures.** Page objects, an API client and a disposable test user are injected into tests through [`fixtures/index.ts`](fixtures/index.ts). There's no setup boilerplate in specs.
-- **API and hybrid testing.** A typed [Book Store API client](api/BookStoreApi.ts). Test users are created through the API, used in the UI, then deleted.
-- **Data-driven tests.** Web Tables records come from [`test-data/`](test-data). Links, alerts and boundary cases are parameterised.
-- **Custom matcher.** `expect(field).toBeInvalid()` asserts HTML5 form validation and retries like built-in assertions.
-- **No hard waits.** Delayed UI such as dynamic buttons, timed alerts and the progress bar is handled with Playwright's auto-retrying assertions, never `waitForTimeout`.
-- **Resilient by design.** Third-party ads are blocked at the network layer, and locators prefer roles and labels over brittle CSS.
-- **Defects tracked, not hidden.** Real site bugs are documented in [`docs/defects.md`](docs/defects.md) and handled explicitly (`test.fail`, allow-lists), so the suite stays green but honest.
-- **CI/CD.** A GitHub Actions matrix runs the API and Chromium projects in parallel and uploads an HTML report for each.
-
-## Test coverage
-
-| Area | Pages | Test types |
-|---|---|---|
-| Elements | Text Box, Check Box, Radio Button, Web Tables, Buttons, Links, Upload/Download, Dynamic Properties | Functional (positive/negative), boundary, data-driven, multi-tab, network, file I/O, waits |
-| Forms | Practice Form | End-to-end form, validation, boundary, dependent fields, date picker, file upload |
-| Alerts, Frames & Windows | Alerts, Browser Windows, Frames | JS dialogs, new tabs, iframes |
-| Widgets & Interactions | Slider, Progress Bar, Select Menu, Droppable | Custom controls, mouse interactions |
-| Book Store | Login, Profile, Books | Authentication, search, hybrid API → UI |
-| API | `/BookStore/v1/Books`, `/Account/v1/*` | Status codes, response schema, chained requests, negative cases |
-| Non-functional | Practice Form, Text Box | Visual regression, keyboard accessibility, axe WCAG scan |
-
-All **49 manual test cases** in the [test plan](docs/manual-test-plan.md) are automated
-(65 tests once data-driven cases are expanded).
-
-## Tech stack
-
-| | |
+| Area | Examples |
 |---|---|
-| Test runner | [Playwright Test](https://playwright.dev) 1.48 |
-| Language | TypeScript (strict mode) |
-| Accessibility | [@axe-core/playwright](https://github.com/dequelabs/axe-core-npm) |
-| CI | GitHub Actions |
-| Reporting | Playwright HTML report with traces, screenshots and video on failure |
+| **End-to-end journeys** | Reader logs in, finds a book, adds it to their collection, deletes it, logs out · Student enrols through the full registration form · HR adds, edits and removes an employee |
+| Elements | Form validation, checkbox tree, radio buttons, table CRUD and search, mouse clicks, new tabs, HTTP status links, upload and download, delayed elements |
+| Forms | Required fields, mobile number boundaries, dependent State/City dropdowns |
+| Alerts, Frames & Windows | Alert, timed alert, confirm and prompt dialogs, new tab, iframe |
+| Widgets & Interactions | Slider, progress bar, select menu, drag and drop |
+| Book Store API | Book listing schema, account creation, token, duplicate user (406) |
+| Non-functional | Visual regression, keyboard-only use, axe WCAG scan |
 
-## Project structure
+68 tests in total: 66 browser tests on Chromium and 2 API tests. 13 are tagged `@smoke`
+and 4 are `@e2e` journeys.
+
+## How the framework is put together
 
 ```
-├── api/                      # API client (Book Store)
-├── docs/
-│   ├── manual-test-plan.md   # Test strategy and 49 manual test cases
-│   └── defects.md            # Bugs found on DemoQA
-├── fixtures/
-│   └── index.ts              # Custom test fixtures and the toBeInvalid() matcher
-├── pages/                    # Page Objects, one per page, all extend BasePage
-├── test-data/                # JSON data sets, user generator, upload files
-├── tests/
-│   ├── api/                  # API tests (no browser)
-│   ├── non-functional/       # Visual and accessibility tests
-│   └── ui/                   # UI tests grouped by DemoQA section
-│       ├── alerts-frames-windows/
-│       ├── bookstore/
-│       ├── elements/
-│       ├── forms/
-│       └── widgets/
-├── playwright.config.ts
-└── .github/workflows/playwright.yml
+pages/                 one class per page, grouped like the site's menu
+  BasePage.ts          open(), URL check, native dialog handling
+  components/          parts reused across pages: SideMenu, RegistrationForm, SubmissionModal, ConfirmDialog
+  elements/ forms/ alerts/ widgets/ bookstore/
+api/BookStoreApi.ts    typed client for the Book Store and Account endpoints
+fixtures/              page objects, API client and test users injected into each test; custom matcher
+test-data/             data factories (Faker), JSON data set, upload file
+tests/
+  e2e/                 multi-page user journeys
+  ui/                  feature tests per page
+  api/                 API tests, no browser
+  non-functional/      visual and accessibility
+docs/                  test plan and defect log
 ```
 
-### How a test reads
+A few decisions worth calling out:
+
+- **Page objects own the "how", tests own the "what".** Tests only call intent-level
+  methods (`addEmployee`, `requestBookDeletion`, `answerPrompt`) and assert on exposed
+  locators. There are no selectors in spec files, so a markup change is fixed in one place.
+- **Components for anything shared.** The side menu, modals and dialogs are their own classes
+  and are composed into pages, not copied between them.
+- **Setup through the API, verification through the UI.** `testUser` creates a fresh Book Store
+  account per test and deletes it afterwards. `loggedInUser` goes one step further and injects
+  the session cookies, so a test can start on the Profile page without using the login form.
+- **Fresh data every run.** Factories in `test-data/factories.ts` generate students, employees
+  and users with Faker, so tests don't collide with each other or with leftovers on the shared site.
+- **No fixed waits.** Delayed elements, timed alerts and the progress bar rely on Playwright's
+  retrying assertions. There isn't a `waitForTimeout` anywhere in the suite.
+- **Known bugs are visible, not skipped.** Site defects are logged and handled explicitly. For
+  example, the broken Close button is a `test.fail()`, which turns into an alert once the site fixes it.
+
+Here's what one of the journeys looks like:
 
 ```ts
-test('TC-BT-01 double click shows the double click message', { tag: '@smoke' }, async ({ buttonsPage }) => {
-  await buttonsPage.open();
-  await buttonsPage.doubleClickButton.dblclick();
+test('E2E-04 HR adds a new starter, updates their details, then removes them', async ({ webTablesPage }) => {
+  const employee = buildEmployee();
+  ...
+  await test.step(`add ${employee.firstName} ${employee.lastName}`, async () => {
+    await webTablesPage.addEmployee(employee);
 
-  await expect(buttonsPage.doubleClickMessage).toHaveText('You have done a double click');
-});
+    await expect(webTablesPage.cellsFor(employee.email)).toHaveText(tableRow(employee));
+  });
+
+  await test.step('give them a raise and move department', async () => {
+    await webTablesPage.editEmployee(employee.email, promotion);
+    ...
 ```
 
-Test names start with their test-case ID, so any result can be traced back to the
-[manual test plan](docs/manual-test-plan.md).
+Each `test.step` shows up as a named step in the HTML report, so a failed journey shows
+exactly which part broke.
 
-## Getting started
+## Running it
 
-**Prerequisites:** Node.js 20 or 22 LTS, and Git.
+Requires Node.js 20 or 22 LTS.
 
 ```bash
 git clone https://github.com/afzal-ahmed-qa/playwrightE2eTests.git
 cd playwrightE2eTests
 npm ci
-npx playwright install --with-deps
+npx playwright install --with-deps chromium
 ```
 
-## Running tests
-
-| Command | What it runs |
+| Command | Runs |
 |---|---|
-| `npm test` | Everything: UI tests on Chromium plus API tests |
-| `npm run test:chromium` | All UI tests on Chromium only |
-| `npm run test:api` | API tests only (no browser) |
-| `npm run test:smoke` | Tests tagged `@smoke`, a quick health check |
-| `npm run test:a11y` | Accessibility tests |
-| `npm run test:visual` | Visual regression tests |
-| `npm run test:visual:update` | Re-create the visual baseline after an intended UI change |
-| `npm run test:headed` | Chromium with a visible browser window |
-| `npm run test:ui` | Playwright UI mode for debugging |
+| `npm test` | Everything |
+| `npm run test:e2e` | The end-to-end journeys |
+| `npm run test:smoke` | Quick health check (`@smoke`) |
+| `npm run test:api` | API tests only |
+| `npm run test:a11y` / `test:visual` | Accessibility / visual tests |
+| `npm run test:visual:update` | Re-create the visual baseline |
+| `npm run test:headed` | Visible browser, one test at a time |
+| `npm run test:ui` | Playwright UI mode |
 | `npm run report` | Open the last HTML report |
-| `npm run typecheck` | TypeScript type check |
+| `npm run typecheck` | TypeScript check |
 
-Run a single test case by its ID:
+To watch a run, slow it down with `SLOW_MO` (milliseconds per action):
 
-```bash
-npx playwright test -g "TC-WT-02"
+```powershell
+$env:SLOW_MO = "400"; npm run test:headed -- tests/e2e
 ```
 
-Point the suite at another environment:
-
 ```bash
-BASE_URL=https://staging.example.com npm test
+SLOW_MO=400 npm run test:headed -- tests/e2e
 ```
 
-## Reports and debugging
+A single case can be run by its ID: `npx playwright test -g "E2E-01"`.
+`BASE_URL` points the suite at another environment (default `https://demoqa.com`).
 
-- Every test, **passed or failed**, records a **video** and a final **screenshot**, both
-  embedded in the HTML report.
-- Failed tests also keep a **trace** (DOM snapshots, network and console for each step).
-  Open it from the report or with `npx playwright show-trace <trace.zip>`.
-- Locally, the report is written to `playwright-report/`. Open it with `npm run report`.
-- On CI, the report is published to **[GitHub Pages](https://afzal-ahmed-qa.github.io/playwrightE2eTests/)**
-  after every push to `main`, and is saved as the `playwright-report` artifact on each run for 30 days.
+## Reports and CI
 
-## Continuous integration
+Every test records a video and a final screenshot, passed or failed. Failures also keep a
+trace with DOM snapshots, network calls and console output for each step.
 
-[`.github/workflows/playwright.yml`](.github/workflows/playwright.yml) runs on every push and
-pull request to `main`, and can be started manually:
+GitHub Actions ([workflow](.github/workflows/playwright.yml)) runs on every push and pull request:
 
 ```
 test (api) ──────┐
-                 ├──► merge HTML report ──► publish to GitHub Pages (main only)
-test (chromium) ─┘         │
-                           └──► playwright-report artifact (30 days)
+                 ├──► merge into one HTML report ──► publish to GitHub Pages (main only)
+test (chromium) ─┘
 ```
 
-- The **api** and **chromium** jobs run in parallel and independently. Each one saves a blob report.
-- The `api` job also runs the TypeScript type check.
-- A **merge** job combines both into one HTML report and saves it as an artifact.
-- A **deploy** job publishes it to GitHub Pages. This runs even when tests fail, so failures can be inspected online.
-- Up to 2 retries on CI absorb network hiccups from the shared public site.
-- Visual tests are excluded on CI, because screenshot baselines depend on the OS and are kept for local runs.
+- API and browser jobs run in parallel. The API job also runs the type check.
+- The merged report is published to [GitHub Pages](https://afzal-ahmed-qa.github.io/playwrightE2eTests/)
+  and kept as a build artifact for 30 days.
+- CI retries a failed test up to twice, since the public site is occasionally slow.
+- Visual tests run locally only, because screenshot baselines differ between operating systems.
+  The committed baseline is for Windows. Run `npm run test:visual:update` once on other systems.
 
-## Known defects
+## Defects found
 
-The suite found real bugs on DemoQA. They're documented in [`docs/defects.md`](docs/defects.md)
-and handled explicitly in the tests:
+Running the plan turned up real issues on DemoQA. Details and reproduction steps are in
+[docs/defects.md](docs/defects.md).
 
-| ID | Defect | How the suite handles it |
+| ID | Defect | Handling in the suite |
 |---|---|---|
-| DEF-001 | "Permanent Address" field has no accessible label | Allow-listed, so the axe scan still fails on any *new* critical issue |
-| DEF-002 | Practice Form modal "Close" button throws a JS error | `test.fail()`, which flags it automatically once fixed |
-| DEF-003/004 | Typos in on-page messages | Assertions target the meaningful value |
+| DEF-001 | "Permanent Address" field has no accessible label | Allow-listed so the axe scan still catches new issues |
+| DEF-002 | Practice Form "Close" button throws a JS error | `test.fail()`, which flags it once fixed |
+| DEF-003 | Links page says "staus" instead of "status" | Assertion accepts both |
+| DEF-004 | Text Box output says "Permananet Address" | Assertion checks the value only |
 
-## Author
+---
 
-**Afzal Ahmed**, QA Automation Engineer · [GitHub](https://github.com/afzal-ahmed-qa)
+Afzal Ahmed · [GitHub](https://github.com/afzal-ahmed-qa)

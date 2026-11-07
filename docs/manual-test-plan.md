@@ -4,19 +4,19 @@
 |---|---|
 | **Application under test** | https://demoqa.com (public QA practice site) |
 | **Author** | Afzal Ahmed |
-| **Version** | 1.0 – 2026-11-04 |
-| **Status** | All 49 test cases automated (Playwright + Page Object Model). See the [README](../README.md) |
+| **Version** | 1.1 – 2026-11-07 |
+| **Status** | Executed manually; all cases automated. See the [README](../README.md) |
 
 ---
 
 ## 1. Purpose
 
-This plan describes **what** we will test on DemoQA, **why**, and **how**. Every test case is
-written so it can be run by hand first. Once a case has been run manually and its behaviour is
-understood, it will be automated in Playwright using the Page Object Model (POM).
+This plan defines what is tested on DemoQA, why, and how. Each case was written and executed
+manually before being automated with Playwright, so the automated suite reflects behaviour that
+was observed on the real site rather than assumed.
 
-Each test case ID (for example `TC-TB-01`) is reused as the name of the automated test, so a
-manual case can always be traced to its automated version.
+Test case IDs (for example `TC-TB-01`) are used as the prefix of the matching automated test,
+which keeps every result traceable back to this document. End-to-end scenarios use `E2E-NN`.
 
 ## 2. Scope
 
@@ -37,11 +37,9 @@ manual case can always be traced to its automated version.
 - Security testing
 - Pages with known bugs or that are unstable on DemoQA (for example *Broken Links*). They are listed but not prioritised.
 
-## 3. Test types covered
+## 3. Test approach
 
-You'll be asked about these terms in interviews, so it helps to know each one clearly.
-
-| Type | What it means | Example in this plan |
+| Type | Description | Example |
 |---|---|---|
 | **Functional: positive** | Valid input → feature works | Submit Text Box with valid data |
 | **Functional: negative** | Invalid input → app handles it gracefully | Invalid email is highlighted |
@@ -52,6 +50,7 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 | **Hybrid (API + UI)** | Set up data via API, verify in UI | Create user via API → log in via UI |
 | **Visual regression** | Compare screenshots to a baseline | Practice Form layout |
 | **Accessibility** | Check for a11y issues (WCAG) | Automated axe scan of key pages |
+| **End-to-end** | A complete user goal across several pages | Log in → add a book → manage the collection → log out |
 
 ## 4. Test environment
 
@@ -63,18 +62,16 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 | Tools (manual) | Browser + DevTools (for checking elements and network calls) |
 | Tools (automation) | Playwright Test, TypeScript, GitHub Actions |
 
-> **Tip for manual runs:** DemoQA shows a lot of ads, which can cover buttons. If something can't
-> be clicked, scroll or close the ad. Note it under **Actual result**, because the automated
-> tests will need to handle it (we already block ads in the current tests).
+**Note:** DemoQA serves third-party ads that can overlap controls during manual runs. The
+automated suite blocks ad domains at the network level.
 
-## 5. How to read and run a test case
+## 5. Test case format
 
-- **ID**: `TC-<module>-<number>`, used later as the automated test name.
+- **ID**: `TC-<module>-<number>`, matching the automated test name.
 - **Priority**: **High** = core feature, run on every change. **Medium** = important. **Low** = nice to have.
-- **Preconditions**: what must be true before you start.
-- **Steps / Expected result**: do each step, then check the expected result for that step.
-- **Actual result / Status**: fill these in while running manually. If actual ≠ expected,
-  mark **Fail** and write down what you saw. That is a defect (see section 8).
+- **Steps / Expected result**: expected result is checked after each step.
+- **Actual result / Status**: recorded during manual execution. Deviations are logged in
+  [defects.md](defects.md).
 
 ---
 
@@ -152,7 +149,7 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 |---|---|---|
 | 1 | Tick **Home** | All child folders are ticked. Result lists every item in the tree (home, desktop, notes, commands, documents, …) |
 
-> ✅ Automated in `tests/ui/elements/check-box.spec.ts`.
+**Automated in:** `tests/ui/elements/check-box.spec.ts`
 
 ---
 
@@ -193,7 +190,7 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 | 2 | Fill First Name `Jane`, Last Name `Doe`, Email `jane@example.com`, Age `30`, Salary `5000`, Department `QA` | – |
 | 3 | Click **Submit** | Modal closes. New row with all entered values appears in the table |
 
-**Data-driven idea:** repeat with 3 different users (we'll use a data file when automating).
+**Data-driven:** repeated for each record in `test-data/web-table-records.json`.
 
 #### TC-WT-03 · Required fields are validated
 **Priority:** High · **Type:** Functional (negative)
@@ -263,7 +260,7 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 |---|---|---|
 | 1 | Single-click **Double Click Me** | No message appears |
 
-> ✅ Automated in `tests/ui/elements/buttons.spec.ts`.
+**Automated in:** `tests/ui/elements/buttons.spec.ts`
 
 ---
 
@@ -317,8 +314,7 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 | 1 | Open the page | **Visible After 5 Seconds** is not shown |
 | 2 | Wait ~5 seconds | Button appears |
 
-> 💡 **Interview point:** this is where beginners use `sleep(5000)`. In automation we'll use
-> Playwright's auto-waiting assertions instead, and be ready to explain why.
+**Automation note:** no fixed sleeps. Assertions retry until the state changes (10 s timeout).
 
 ---
 
@@ -332,9 +328,9 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 | 2 | Select Gender **Male** | – |
 | 3 | Enter Mobile `0123456789` (10 digits) | – |
 | 4 | Click **Submit** | Modal "Thanks for submitting the form" shows the entered name, gender and mobile |
-| 5 | Click **Close** | Modal closes. ⚠️ **Fails: see DEF-002** in [defects.md](defects.md). Escape closes it |
+| 5 | Click **Close** | Modal closes. **Actual: fails, see DEF-002.** Escape closes it |
 
-#### TC-PF-02 · Submit with all fields
+#### TC-PF-02 · Submit with all fields (automated as part of E2E-03)
 **Priority:** High · **Type:** Functional (positive), end-to-end
 | # | Step | Expected result |
 |---|---|---|
@@ -479,12 +475,12 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 | 1 | Create a user with TC-API-02 | User created |
 | 2 | Log in with that user in the UI (TC-BS-01) | Profile shows that username |
 
-> 💡 **Interview point:** setting up test data via API and only checking the UI is a
-> real-world best practice. It makes tests faster and more stable.
+**Automation note:** test users are created through the API and deleted after each test, so
+UI tests never depend on pre-existing accounts.
 
 ---
 
-### 6.13 Non-functional (run once manually to understand. Mostly done by tools)
+### 6.13 Non-functional
 
 #### TC-NF-01 · Visual check of Practice Form
 **Priority:** Low · **Type:** Visual regression
@@ -498,6 +494,51 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 |---|---|---|
 | 1 | Use only **Tab** to move through the form and **Enter** to submit | Every field can be reached and the form can be submitted without a mouse |
 | 2 | (Optional) Run Lighthouse → Accessibility in Chrome DevTools | Note the score and any issues reported |
+
+---
+
+### 6.14 End-to-end scenarios
+
+These cover complete user goals across several pages, the way a real user moves through the site.
+
+#### E2E-01 · New reader builds and manages a reading list
+**Priority:** High · **Type:** End-to-end, hybrid (user created via API)
+| # | Step | Expected result |
+|---|---|---|
+| 1 | Log in with a newly registered account | Profile page shows the username and an empty collection |
+| 2 | Click **Go To Book Store**, search `Git` | Only *Git Pocket Guide* is listed |
+| 3 | Open *Git Pocket Guide* | Detail page shows ISBN 9781449325862, title and author |
+| 4 | Click **Add To Your Collection** | Alert "Book added to your collection." |
+| 5 | Open the Profile | *Git Pocket Guide* is in the collection |
+| 6 | Click the delete icon, then **OK** in the confirmation | Alert "Book deleted.", collection is empty |
+| 7 | Check the account through the API | API also reports no books |
+| 8 | Click **Logout**, then open `/profile` | Redirected to Login; Profile says the user is not logged in |
+
+#### E2E-02 · Returning reader sees books added elsewhere
+**Priority:** Medium · **Type:** End-to-end, session created via API
+| # | Step | Expected result |
+|---|---|---|
+| 1 | Add two books to the account through the API | HTTP 201 |
+| 2 | Open `/profile` with an API-created session (no login form) | Username and both books are shown |
+| 3 | Click delete on one book, then **Cancel** | Dialog closes, both books remain |
+
+#### E2E-03 · Student finds the registration form and enrols
+**Priority:** High · **Type:** End-to-end
+| # | Step | Expected result |
+|---|---|---|
+| 1 | From the home page click **Forms**, then **Practice Form** in the side menu | Practice Form opens |
+| 2 | Fill in every field (generated student data, photo upload, date picker, state/city) and submit | Confirmation modal opens |
+| 3 | Check the summary table | Every value matches what was entered |
+| 4 | Press Escape | Modal closes |
+
+#### E2E-04 · HR manages an employee record from start to finish
+**Priority:** High · **Type:** End-to-end, CRUD
+| # | Step | Expected result |
+|---|---|---|
+| 1 | Add a new employee | New row appears with every value |
+| 2 | Search by last name | Only that employee is listed |
+| 3 | Edit salary and department | Row shows the new values |
+| 4 | Delete the employee, clear the search | Row is gone, original rows remain |
 
 ---
 
@@ -518,7 +559,8 @@ You'll be asked about these terms in interviews, so it helps to know each one cl
 | Widgets/Interactions | 4 | 0 | 3 | 1 |
 | Book Store UI/API | 6 | 4 | 2 | 0 |
 | Non-functional | 2 | 0 | 0 | 2 |
-| **Total** | **49** | **27** | **18** | **4** |
+| End-to-end | 4 | 3 | 1 | 0 |
+| **Total** | **53** | **30** | **19** | **4** |
 
 ## 8. Defect reporting
 
@@ -534,8 +576,7 @@ Browser/OS:   Chrome 1xx / Windows 11
 Severity:     Critical / Major / Minor
 ```
 
-DemoQA is a practice site and has some real bugs. Finding and reporting them well is a good
-portfolio skill. They are kept in [defects.md](defects.md).
+Defects found so far are logged in [defects.md](defects.md).
 
 ## 9. Entry and exit criteria
 
@@ -546,75 +587,19 @@ portfolio skill. They are kept in [defects.md](defects.md).
 
 ---
 
-## 10. Automation roadmap (what we'll do together next)
+## 10. Automation coverage
 
-We'll automate in this order. Each phase teaches one new skill.
+Every case above is automated. The test name starts with the case ID.
 
-| Phase | What we build | Skill you learn |
-|---|---|---|
-| 1 | Project structure + `BasePage`, move Buttons & Check Box tests to POM | Page Object Model basics |
-| 2 | Text Box, Radio Button, Web Tables | Locators, assertions, data-driven tests |
-| 3 | Practice Form | Complex forms, date picker, file upload, boundary tests |
-| 4 | Alerts, Windows, Frames, Dynamic Properties | Dialogs, multi-tab, iframes, auto-waiting |
-| 5 | Custom fixtures (`test.extend`) to inject page objects | Fixtures, less repeated setup code |
-| 6 | Book Store API tests + hybrid API → UI login | API testing, auth, storage state |
-| 7 | Visual + accessibility checks (`@axe-core/playwright`) | Non-functional testing |
-| 8 | CI pipeline, HTML report, tags (`@smoke`, `@regression`) | CI/CD, reporting |
-| 9 | README with badges, how-to-run, and test strategy | Presenting your portfolio |
+| Area | Spec file |
+|---|---|
+| End-to-end journeys (E2E-01 – 04) | `tests/e2e/*.spec.ts` |
+| Elements (TC-TB, CB, RB, WT, BT, LK, UD, DP) | `tests/ui/elements/*.spec.ts` |
+| Practice Form (TC-PF) | `tests/ui/forms/practice-form.spec.ts` |
+| Alerts, Frames & Windows (TC-AL, WN, FR) | `tests/ui/alerts-frames-windows/*.spec.ts` |
+| Widgets & Interactions (TC-WG, IN) | `tests/ui/widgets/widgets.spec.ts` |
+| Book Store UI (TC-BS, HY) | `tests/ui/bookstore/bookstore.spec.ts` |
+| Book Store API (TC-API) | `tests/api/bookstore.api.spec.ts` |
+| Visual and accessibility (TC-NF) | `tests/non-functional/*.spec.ts` |
 
-### Target project structure
-
-```
-playwrightE2eTests/
-├── docs/
-│   ├── manual-test-plan.md     ← this file
-│   └── defects.md              ← bugs found on DemoQA
-├── pages/                      ← Page Objects (one class per page)
-│   ├── BasePage.ts
-│   ├── ButtonsPage.ts
-│   ├── CheckBoxPage.ts
-│   └── ...
-├── api/
-│   └── BookStoreApi.ts         ← typed API client
-├── fixtures/
-│   └── index.ts                ← injects page objects, API client, test user
-├── test-data/
-│   ├── web-table-records.json  ← data for data-driven tests
-│   └── users.ts                ← unique test-user generator
-├── tests/
-│   ├── ui/
-│   │   ├── elements/
-│   │   ├── forms/
-│   │   └── alerts-frames-windows/
-│   └── api/
-│       └── bookstore.api.spec.ts
-└── playwright.config.ts
-```
-
-### Page Object Model in one minute
-
-A **page object** is a class that knows *how* to use a page (its locators and actions). A
-**test** only says *what* to do and *what to expect*. When the site changes (like the Check Box
-page did), you fix the page object once instead of fixing every test.
-
-```ts
-// pages/ButtonsPage.ts – the "how"
-export class ButtonsPage {
-  readonly doubleClickButton: Locator;
-  readonly doubleClickMessage: Locator;
-
-  constructor(private page: Page) {
-    this.doubleClickButton = page.getByRole('button', { name: 'Double Click Me' });
-    this.doubleClickMessage = page.locator('#doubleClickMessage');
-  }
-
-  async open() { await this.page.goto('/buttons'); }
-}
-
-// tests/ui/elements/buttons.spec.ts – the "what"
-test('TC-BT-01 double click shows message', async ({ buttonsPage }) => {
-  await buttonsPage.open();
-  await buttonsPage.doubleClickButton.dblclick();
-  await expect(buttonsPage.doubleClickMessage).toHaveText('You have done a double click');
-});
-```
+Framework design (Page Object Model, fixtures, test data) is described in the [README](../README.md).
