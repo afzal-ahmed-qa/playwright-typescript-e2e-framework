@@ -18,6 +18,8 @@ case. A few real bugs turned up along the way; they're listed at the bottom.
 I've also written a separate set of manual test plans for an e-commerce site and its API, if
 that side of testing is more relevant to you:
 [manual-test-plans-ecommerce](https://github.com/afzal-ahmed-qa/manual-test-plans-ecommerce).
+My Postman/Newman work is in
+[petstore-api-tests-postman](https://github.com/afzal-ahmed-qa/petstore-api-tests-postman).
 
 ## What's tested
 
