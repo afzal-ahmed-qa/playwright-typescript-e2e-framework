@@ -14,6 +14,9 @@ I wrote the [test plan](docs/manual-test-plan.md) first and ran every case by ha
 automating it. That's how the [defects](docs/defects.md) listed below were found, and why each
 automated test starts with the ID of the manual case it covers.
 
+For manual test design on a larger application (an e-commerce shop and its REST API), see
+[manual-test-plans-ecommerce](https://github.com/afzal-ahmed-qa/manual-test-plans-ecommerce).
+
 ## What's covered
 
 | Area | Examples |
