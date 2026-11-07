@@ -1,14 +1,14 @@
 # DemoQA Test Automation Framework
 
-[![Playwright Tests](https://github.com/afzal-ahmed-qa/playwrightE2eTests/actions/workflows/playwright.yml/badge.svg)](https://github.com/afzal-ahmed-qa/playwrightE2eTests/actions/workflows/playwright.yml)
+[![Playwright Tests](https://github.com/afzal-ahmed-qa/playwright-typescript-e2e-framework/actions/workflows/playwright.yml/badge.svg)](https://github.com/afzal-ahmed-qa/playwright-typescript-e2e-framework/actions/workflows/playwright.yml)
 ![Playwright](https://img.shields.io/badge/Playwright-1.48-2EAD33?logo=playwright&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
-[![Test Report](https://img.shields.io/badge/Test%20Report-live-blue?logo=githubpages&logoColor=white)](https://afzal-ahmed-qa.github.io/playwrightE2eTests/)
+[![Test Report](https://img.shields.io/badge/Test%20Report-live-blue?logo=githubpages&logoColor=white)](https://afzal-ahmed-qa.github.io/playwright-typescript-e2e-framework/)
 
 UI, API and end-to-end tests for [demoqa.com](https://demoqa.com), written in TypeScript with
 Playwright and the Page Object Model.
 
-**[Latest test report →](https://afzal-ahmed-qa.github.io/playwrightE2eTests/)** (video and screenshot for every test, published from CI)
+**[Latest test report →](https://afzal-ahmed-qa.github.io/playwright-typescript-e2e-framework/)** (video and screenshot for every test, published from CI)
 
 I wrote the [test plan](docs/manual-test-plan.md) first and ran every case by hand before
 automating it. That's how the [defects](docs/defects.md) listed below were found, and why each
@@ -89,8 +89,8 @@ exactly which part broke.
 Requires Node.js 20 or 22 LTS.
 
 ```bash
-git clone https://github.com/afzal-ahmed-qa/playwrightE2eTests.git
-cd playwrightE2eTests
+git clone https://github.com/afzal-ahmed-qa/playwright-typescript-e2e-framework.git
+cd playwright-typescript-e2e-framework
 npm ci
 npx playwright install --with-deps chromium
 ```
@@ -135,7 +135,7 @@ test (chromium) ─┘
 ```
 
 - API and browser jobs run in parallel. The API job also runs the type check.
-- The merged report is published to [GitHub Pages](https://afzal-ahmed-qa.github.io/playwrightE2eTests/)
+- The merged report is published to [GitHub Pages](https://afzal-ahmed-qa.github.io/playwright-typescript-e2e-framework/)
   and kept as a build artifact for 30 days.
 - CI retries a failed test up to twice, since the public site is occasionally slow.
 - Visual tests run locally only, because screenshot baselines differ between operating systems.
