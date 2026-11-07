@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { BasePage } from '../BasePage';
 import { RegistrationForm } from '../components/RegistrationForm';
 import type { Employee } from '../../test-data/factories';
@@ -45,9 +45,12 @@ export class WebTablesPage extends BasePage {
     await this.rowFor(email).getByTitle('Edit').click();
     await this.form.fill(changes);
     await this.form.submit();
+    await expect(this.form.root).toBeHidden();
   }
 
   async deleteEmployee(email: string): Promise<void> {
+    // The modal fades out; clicking during the fade hits its backdrop instead of the row.
+    await expect(this.form.root).toBeHidden();
     await this.rowFor(email).getByTitle('Delete').click();
   }
 

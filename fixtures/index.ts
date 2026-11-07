@@ -28,6 +28,12 @@ import { ProfilePage } from '../pages/bookstore/ProfilePage';
 // DemoQA is covered in third-party ads that slow pages down and sit on top of buttons.
 const AD_HOSTS = /googlesyndication|doubleclick|adservice|adplus|pubads|googletagservices/;
 
+// Blocking the ad requests still leaves their empty containers in the layout. On Linux (CI) the
+// fonts render a little wider and the right-hand ad column ends up covering the last table column.
+const HIDE_AD_SLOTS = `
+  [id^="Ad.Plus"], #fixedban, .col-12.mt-4.col-md-3.col-xl-3 { display: none !important; }
+`;
+
 export interface TestUser extends Credentials {
   userId: string;
 }
@@ -67,6 +73,13 @@ interface DataFixtures {
 export const test = base.extend<PageFixtures & DataFixtures>({
   context: async ({ context }, use) => {
     await context.route(AD_HOSTS, (route) => route.abort());
+    await context.addInitScript((css) => {
+      document.addEventListener('DOMContentLoaded', () => {
+        const style = document.createElement('style');
+        style.textContent = css;
+        document.head.appendChild(style);
+      });
+    }, HIDE_AD_SLOTS);
     await use(context);
   },
 
