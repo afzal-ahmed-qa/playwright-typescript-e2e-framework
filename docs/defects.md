@@ -12,7 +12,7 @@ DemoQA is a public practice site, so these are recorded for reference rather tha
 
 ---
 
-### DEF-001 · Text Box: "Permanent Address" field has no accessible label
+### DEF-001, Text Box: "Permanent Address" field has no accessible label
 
 | | |
 |---|---|
@@ -32,7 +32,7 @@ has no placeholder, so it has no accessible name.
 
 ---
 
-### DEF-002 · Practice Form: "Close" button does not close the confirmation modal
+### DEF-002, Practice Form: "Close" button does not close the confirmation modal
 
 | | |
 |---|---|
@@ -57,7 +57,7 @@ the site is fixed, which is the signal to remove the annotation.
 
 ---
 
-### DEF-003 · Links: response message misspells "status"
+### DEF-003, Links: response message misspells "status"
 
 | | |
 |---|---|
@@ -71,7 +71,7 @@ the site is fixed, which is the signal to remove the annotation.
 
 ---
 
-### DEF-004 · Text Box: output label misspells "Permanent"
+### DEF-004, Text Box: output label misspells "Permanent"
 
 | | |
 |---|---|

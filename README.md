@@ -1,73 +1,81 @@
-# DemoQA Test Automation Framework
+# Playwright + TypeScript E2E framework for DemoQA
 
 [![Playwright Tests](https://github.com/afzal-ahmed-qa/playwright-typescript-e2e-framework/actions/workflows/playwright.yml/badge.svg)](https://github.com/afzal-ahmed-qa/playwright-typescript-e2e-framework/actions/workflows/playwright.yml)
 ![Playwright](https://img.shields.io/badge/Playwright-1.48-2EAD33?logo=playwright&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
-[![Test Report](https://img.shields.io/badge/Test%20Report-live-blue?logo=githubpages&logoColor=white)](https://afzal-ahmed-qa.github.io/playwright-typescript-e2e-framework/)
 
-UI, API and end-to-end tests for [demoqa.com](https://demoqa.com), written in TypeScript with
-Playwright and the Page Object Model.
+Test automation for [demoqa.com](https://demoqa.com) using Playwright, TypeScript and the Page
+Object Model. It covers the UI, the Book Store API, a few end-to-end user journeys and some
+accessibility and visual checks. GitHub Actions runs it on every push and publishes the HTML
+report here: https://afzal-ahmed-qa.github.io/playwright-typescript-e2e-framework/. Every test in
+the report has a video and a screenshot attached.
 
-**[Latest test report →](https://afzal-ahmed-qa.github.io/playwright-typescript-e2e-framework/)** (video and screenshot for every test, published from CI)
+I started by writing a [manual test plan](docs/manual-test-plan.md) and going through the cases
+by hand before automating anything. Each test name starts with the ID of its case in that plan
+(`TC-BT-01`, `E2E-03` and so on), so any result in the report can be traced back to the written
+case. A few real bugs turned up along the way; they're listed at the bottom.
 
-I wrote the [test plan](docs/manual-test-plan.md) first and ran every case by hand before
-automating it. That's how the [defects](docs/defects.md) listed below were found, and why each
-automated test starts with the ID of the manual case it covers.
-
-For manual test design on a larger application (an e-commerce shop and its REST API), see
+I've also written a separate set of manual test plans for an e-commerce site and its API, if
+that side of testing is more relevant to you:
 [manual-test-plans-ecommerce](https://github.com/afzal-ahmed-qa/manual-test-plans-ecommerce).
 
-## What's covered
+## What's tested
 
-| Area | Examples |
-|---|---|
-| **End-to-end journeys** | Reader logs in, finds a book, adds it to their collection, deletes it, logs out · Student enrols through the full registration form · HR adds, edits and removes an employee |
-| Elements | Form validation, checkbox tree, radio buttons, table CRUD and search, mouse clicks, new tabs, HTTP status links, upload and download, delayed elements |
-| Forms | Required fields, mobile number boundaries, dependent State/City dropdowns |
-| Alerts, Frames & Windows | Alert, timed alert, confirm and prompt dialogs, new tab, iframe |
-| Widgets & Interactions | Slider, progress bar, select menu, drag and drop |
-| Book Store API | Book listing schema, account creation, token, duplicate user (406) |
-| Non-functional | Visual regression, keyboard-only use, axe WCAG scan |
+- End-to-end journeys: a Book Store reader logs in, finds a book, adds it to their collection,
+  deletes it and logs out; a student finds the registration form from the home page and enrols;
+  an HR user adds, edits and removes an employee record.
+- Elements pages: text box validation, the checkbox tree, radio buttons, web table add/edit/delete
+  and search, double and right click, links that open new tabs or return HTTP status codes, file
+  upload and download, and buttons that only become usable after a delay.
+- Practice form: required fields, mobile number boundaries and the State/City dropdowns that
+  depend on each other.
+- Alerts, frames and new windows, plus the slider, progress bar, select menu and drag and drop.
+- Book Store API: the book list and its schema, creating a user, generating a token, and the 406
+  you get for a duplicate user.
+- A visual comparison of the practice form, keyboard-only use of the text box form and an axe
+  accessibility scan.
 
-68 tests in total: 66 browser tests on Chromium and 2 API tests. 13 are tagged `@smoke`
-and 4 are `@e2e` journeys.
+That's 68 tests: 66 run in Chromium and 2 are API-only. 13 are tagged `@smoke` and 4 are `@e2e`.
 
-## How the framework is put together
+## Project layout
 
 ```
-pages/                 one class per page, grouped like the site's menu
-  BasePage.ts          open(), URL check, native dialog handling
-  components/          parts reused across pages: SideMenu, RegistrationForm, SubmissionModal, ConfirmDialog
-  elements/ forms/ alerts/ widgets/ bookstore/
-api/BookStoreApi.ts    typed client for the Book Store and Account endpoints
-fixtures/              page objects, API client and test users injected into each test; custom matcher
-test-data/             data factories (Faker), JSON data set, upload file
+pages/              page objects, grouped the same way as the site's menu
+  BasePage.ts       open(), URL check and handling of native browser dialogs
+  components/       pieces used on several pages (side menu, modals, confirm dialog)
+api/                small typed client for the Book Store and Account endpoints
+fixtures/           injects page objects, the API client and test users into each test
+test-data/          Faker factories, a JSON data set and a file for the upload test
 tests/
-  e2e/                 multi-page user journeys
-  ui/                  feature tests per page
-  api/                 API tests, no browser
-  non-functional/      visual and accessibility
-docs/                  test plan and defect log
+  e2e/              the multi-page journeys
+  ui/               tests for individual pages
+  api/              API tests (no browser)
+  non-functional/   visual and accessibility
+docs/               manual test plan and the bugs I found
 ```
 
-A few decisions worth calling out:
+## How it's put together
 
-- **Page objects own the "how", tests own the "what".** Tests only call intent-level
-  methods (`addEmployee`, `requestBookDeletion`, `answerPrompt`) and assert on exposed
-  locators. There are no selectors in spec files, so a markup change is fixed in one place.
-- **Components for anything shared.** The side menu, modals and dialogs are their own classes
-  and are composed into pages, not copied between them.
-- **Setup through the API, verification through the UI.** `testUser` creates a fresh Book Store
-  account per test and deletes it afterwards. `loggedInUser` goes one step further and injects
-  the session cookies, so a test can start on the Profile page without using the login form.
-- **Fresh data every run.** Factories in `test-data/factories.ts` generate students, employees
-  and users with Faker, so tests don't collide with each other or with leftovers on the shared site.
-- **No fixed waits.** Delayed elements, timed alerts and the progress bar rely on Playwright's
-  retrying assertions. There isn't a `waitForTimeout` anywhere in the suite.
-- **Known bugs are visible, not skipped.** Site defects are logged and handled explicitly. For
-  example, the broken Close button is a `test.fail()`, which turns into an alert once the site fixes it.
+Spec files don't contain selectors. Page objects expose actions like `addEmployee()` or
+`requestBookDeletion()`, and the locators the tests need for assertions. That paid off early:
+DemoQA rebuilt its Check Box page while I was working on this, and the fix only touched
+`CheckBoxPage.ts`. Anything that appears on more than one page, like the side menu and the
+modals, is its own component class.
 
-Here's what one of the journeys looks like:
+Test data is set up through the API wherever I could. The `testUser` fixture creates a new Book
+Store account for each test and deletes it afterwards. `loggedInUser` goes a step further and sets
+the session cookies directly, so a test can start on the Profile page without going through the
+login form. Names, emails and so on come from Faker, which stops parallel runs from clashing.
+
+There are no hard-coded waits. The delayed buttons, the timed alert and the progress bar all rely
+on Playwright's auto-retrying assertions.
+
+Where the site itself is broken I've kept the test and marked it instead of deleting it. The
+Practice Form's Close button throws a JavaScript error, so that test is wrapped in `test.fail()`.
+If DemoQA ever fixes it, the test will be reported as an unexpected pass and I'll know to update it.
+
+The journeys are split into `test.step` blocks so the report shows which part of a flow failed.
+E2E-04, for example:
 
 ```ts
 test('E2E-04 HR adds a new starter, updates their details, then removes them', async ({ webTablesPage }) => {
@@ -75,7 +83,6 @@ test('E2E-04 HR adds a new starter, updates their details, then removes them', a
   ...
   await test.step(`add ${employee.firstName} ${employee.lastName}`, async () => {
     await webTablesPage.addEmployee(employee);
-
     await expect(webTablesPage.cellsFor(employee.email)).toHaveText(tableRow(employee));
   });
 
@@ -84,12 +91,10 @@ test('E2E-04 HR adds a new starter, updates their details, then removes them', a
     ...
 ```
 
-Each `test.step` shows up as a named step in the HTML report, so a failed journey shows
-exactly which part broke.
+## Running it locally
 
-## Running it
-
-Requires Node.js 20 or 22 LTS.
+You'll need Node.js 20 or 22. I tried Node 26 first and Playwright 1.48's browser download hung
+on it, so CI is pinned to Node 22 as well.
 
 ```bash
 git clone https://github.com/afzal-ahmed-qa/playwright-typescript-e2e-framework.git
@@ -98,64 +103,57 @@ npm ci
 npx playwright install --with-deps chromium
 ```
 
-| Command | Runs |
-|---|---|
-| `npm test` | Everything |
-| `npm run test:e2e` | The end-to-end journeys |
-| `npm run test:smoke` | Quick health check (`@smoke`) |
-| `npm run test:api` | API tests only |
-| `npm run test:a11y` / `test:visual` | Accessibility / visual tests |
-| `npm run test:visual:update` | Re-create the visual baseline |
-| `npm run test:headed` | Visible browser, one test at a time |
-| `npm run test:ui` | Playwright UI mode |
-| `npm run report` | Open the last HTML report |
-| `npm run typecheck` | TypeScript check |
+```bash
+npm test                    # everything
+npm run test:e2e            # just the journeys
+npm run test:smoke          # quick check, @smoke only
+npm run test:api            # API tests only
+npm run test:headed         # visible browser, one test at a time
+npm run test:ui             # Playwright UI mode
+npm run report              # open the last HTML report
+npm run typecheck
+```
 
-To watch a run, slow it down with `SLOW_MO` (milliseconds per action):
+To run a single case, filter by its ID: `npx playwright test -g "E2E-01"`. If you want to watch
+a run, `SLOW_MO` adds a delay (in ms) to every action:
 
 ```powershell
-$env:SLOW_MO = "400"; npm run test:headed -- tests/e2e
+$env:SLOW_MO = "400"; npm run test:headed -- tests/e2e      # PowerShell
 ```
-
 ```bash
-SLOW_MO=400 npm run test:headed -- tests/e2e
+SLOW_MO=400 npm run test:headed -- tests/e2e                # bash
 ```
 
-A single case can be run by its ID: `npx playwright test -g "E2E-01"`.
-`BASE_URL` points the suite at another environment (default `https://demoqa.com`).
+`BASE_URL` points the suite at a different environment. It defaults to `https://demoqa.com`.
 
-## Reports and CI
+## CI
 
-Every test records a video and a final screenshot, passed or failed. Failures also keep a
-trace with DOM snapshots, network calls and console output for each step.
+The [workflow](.github/workflows/playwright.yml) runs the API tests and the Chromium tests as two
+parallel jobs (the API job also runs the TypeScript check). A third job merges their results into
+one HTML report, keeps it as a build artifact for 30 days and publishes it to GitHub Pages.
 
-GitHub Actions ([workflow](.github/workflows/playwright.yml)) runs on every push and pull request:
+Failed tests are retried up to twice on CI, because DemoQA is a shared public site and is
+sometimes slow. The visual test only runs locally, since screenshots render slightly differently
+on each OS. The committed baseline is from Windows; on another OS run `npm run test:visual:update`
+once to create your own.
 
-```
-test (api) ──────┐
-                 ├──► merge into one HTML report ──► publish to GitHub Pages (main only)
-test (chromium) ─┘
-```
+## Bugs found on DemoQA
 
-- API and browser jobs run in parallel. The API job also runs the type check.
-- The merged report is published to [GitHub Pages](https://afzal-ahmed-qa.github.io/playwright-typescript-e2e-framework/)
-  and kept as a build artifact for 30 days.
-- CI retries a failed test up to twice, since the public site is occasionally slow.
-- Visual tests run locally only, because screenshot baselines differ between operating systems.
-  The committed baseline is for Windows. Run `npm run test:visual:update` once on other systems.
+Full steps are in [docs/defects.md](docs/defects.md).
 
-## Defects found
+- DEF-001: the "Permanent Address" field on the Text Box page has no accessible label (axe rates
+  it critical). The accessibility test allow-lists this one issue, so it still fails on anything new.
+- DEF-002: the Close button on the Practice Form confirmation throws `findDOMNode is not a
+  function` and the modal stays open. Covered by a `test.fail()` test; Escape closes it.
+- DEF-003: the Links page says "staus" instead of "status".
+- DEF-004: the Text Box output says "Permananet Address".
 
-Running the plan turned up real issues on DemoQA. Details and reproduction steps are in
-[docs/defects.md](docs/defects.md).
+## Next on my list
 
-| ID | Defect | Handling in the suite |
-|---|---|---|
-| DEF-001 | "Permanent Address" field has no accessible label | Allow-listed so the axe scan still catches new issues |
-| DEF-002 | Practice Form "Close" button throws a JS error | `test.fail()`, which flags it once fixed |
-| DEF-003 | Links page says "staus" instead of "status" | Assertion accepts both |
-| DEF-004 | Text Box output says "Permananet Address" | Assertion checks the value only |
+- Add Firefox and WebKit projects back once the suite is stable enough to justify the extra CI time.
+- Run the visual test in a Docker image so the baseline is the same on every machine.
+- Contract tests for the Book Store API using its Swagger definition.
 
 ---
 
-Afzal Ahmed · [GitHub](https://github.com/afzal-ahmed-qa)
+Afzal Ahmed, [github.com/afzal-ahmed-qa](https://github.com/afzal-ahmed-qa)

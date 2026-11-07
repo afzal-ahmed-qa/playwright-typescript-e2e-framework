@@ -79,8 +79,8 @@ automated suite blocks ad domains at the network level.
 
 ### 6.1 Elements – Text Box (`/text-box`)
 
-#### TC-TB-01 · Submit with all valid data
-**Priority:** High · **Type:** Functional (positive)
+#### TC-TB-01, Submit with all valid data
+**Priority:** High, **Type:** Functional (positive)
 **Preconditions:** Open https://demoqa.com/text-box
 
 | # | Step | Expected result |
@@ -93,8 +93,8 @@ automated suite blocks ad domains at the network level.
 
 **Actual result:** ______ **Status:** ☐ Pass ☐ Fail
 
-#### TC-TB-02 · Invalid email is rejected
-**Priority:** High · **Type:** Functional (negative)
+#### TC-TB-02, Invalid email is rejected
+**Priority:** High, **Type:** Functional (negative)
 **Preconditions:** Open `/text-box`
 
 | # | Step | Expected result |
@@ -105,8 +105,8 @@ automated suite blocks ad domains at the network level.
 
 **Actual result:** ______ **Status:** ☐ Pass ☐ Fail
 
-#### TC-TB-03 · Submit with all fields empty
-**Priority:** Low · **Type:** Functional (negative)
+#### TC-TB-03, Submit with all fields empty
+**Priority:** Low, **Type:** Functional (negative)
 
 | # | Step | Expected result |
 |---|---|---|
@@ -118,15 +118,15 @@ automated suite blocks ad domains at the network level.
 
 ### 6.2 Elements – Check Box (`/checkbox`)
 
-#### TC-CB-01 · Nothing selected by default
-**Priority:** Medium · **Type:** UI state
+#### TC-CB-01, Nothing selected by default
+**Priority:** Medium, **Type:** UI state
 
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Open `/checkbox` | Tree shows **Home** collapsed and unticked. No "You have selected" text |
 
-#### TC-CB-02 · Selecting a folder selects all its children
-**Priority:** High · **Type:** Functional (positive)
+#### TC-CB-02, Selecting a folder selects all its children
+**Priority:** High, **Type:** Functional (positive)
 
 | # | Step | Expected result |
 |---|---|---|
@@ -134,16 +134,16 @@ automated suite blocks ad domains at the network level.
 | 2 | Tick **Desktop** | Desktop is ticked. Home shows a *partial* (half) tick. Documents and Downloads stay unticked |
 | 3 | Read the result text | "You have selected : desktop notes commands" |
 
-#### TC-CB-03 · Unselecting clears the result
-**Priority:** Medium · **Type:** Functional
+#### TC-CB-03, Unselecting clears the result
+**Priority:** Medium, **Type:** Functional
 
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Do TC-CB-02 steps 1–2 | Desktop is ticked |
 | 2 | Untick **Desktop** | Nothing ticked. Result text disappears |
 
-#### TC-CB-04 · Selecting Home selects everything
-**Priority:** Medium · **Type:** Functional
+#### TC-CB-04, Selecting Home selects everything
+**Priority:** Medium, **Type:** Functional
 
 | # | Step | Expected result |
 |---|---|---|
@@ -155,16 +155,16 @@ automated suite blocks ad domains at the network level.
 
 ### 6.3 Elements – Radio Button (`/radio-button`)
 
-#### TC-RB-01 · Select each enabled option
-**Priority:** High · **Type:** Functional (positive), data-driven
+#### TC-RB-01, Select each enabled option
+**Priority:** High, **Type:** Functional (positive), data-driven
 
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **Yes** | "You have selected **Yes**" |
 | 2 | Click **Impressive** | "You have selected **Impressive**". Yes is no longer selected |
 
-#### TC-RB-02 · Disabled option cannot be selected
-**Priority:** Medium · **Type:** Functional (negative)
+#### TC-RB-02, Disabled option cannot be selected
+**Priority:** Medium, **Type:** Functional (negative)
 
 | # | Step | Expected result |
 |---|---|---|
@@ -174,15 +174,15 @@ automated suite blocks ad domains at the network level.
 
 ### 6.4 Elements – Web Tables (`/webtables`)
 
-#### TC-WT-01 · Default data is shown
-**Priority:** Medium · **Type:** UI state
+#### TC-WT-01, Default data is shown
+**Priority:** Medium, **Type:** UI state
 
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Open `/webtables` | Table shows 3 rows with first names Cierra, Alden and Kierra |
 
-#### TC-WT-02 · Add a new record
-**Priority:** High · **Type:** Functional (positive), data-driven
+#### TC-WT-02, Add a new record
+**Priority:** High, **Type:** Functional (positive), data-driven
 
 | # | Step | Expected result |
 |---|---|---|
@@ -192,15 +192,15 @@ automated suite blocks ad domains at the network level.
 
 **Data-driven:** repeated for each record in `test-data/web-table-records.json`.
 
-#### TC-WT-03 · Required fields are validated
-**Priority:** High · **Type:** Functional (negative)
+#### TC-WT-03, Required fields are validated
+**Priority:** High, **Type:** Functional (negative)
 
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **Add**, leave all fields empty, click **Submit** | Modal stays open. Empty required fields are highlighted red |
 
-#### TC-WT-04 · Boundary: Age accepts numbers only
-**Priority:** Medium · **Type:** Boundary / negative
+#### TC-WT-04, Boundary: Age accepts numbers only
+**Priority:** Medium, **Type:** Boundary / negative
 
 | # | Step | Expected result |
 |---|---|---|
@@ -208,23 +208,23 @@ automated suite blocks ad domains at the network level.
 | 2 | Enter Age `99` | Accepted |
 | 3 | Type Age `100` (3 digits) | Field only accepts 2 characters, so it shows `10` (maxlength = 2) |
 
-#### TC-WT-05 · Edit a record
-**Priority:** High · **Type:** Functional
+#### TC-WT-05, Edit a record
+**Priority:** High, **Type:** Functional
 
 | # | Step | Expected result |
 |---|---|---|
-| 1 | Click the ✏️ edit icon on row **Cierra** | Modal opens with Cierra's data filled in |
+| 1 | Click the edit (pencil) icon on row **Cierra** | Modal opens with Cierra's data filled in |
 | 2 | Change Salary to `12345` and submit | Cierra's row shows salary 12345 |
 
-#### TC-WT-06 · Delete a record
-**Priority:** High · **Type:** Functional
+#### TC-WT-06, Delete a record
+**Priority:** High, **Type:** Functional
 
 | # | Step | Expected result |
 |---|---|---|
-| 1 | Click the 🗑️ delete icon on row **Alden** | Alden's row is removed. Other rows remain |
+| 1 | Click the delete (bin) icon on row **Alden** | Alden's row is removed. Other rows remain |
 
-#### TC-WT-07 · Search filters the table
-**Priority:** Medium · **Type:** Functional
+#### TC-WT-07, Search filters the table
+**Priority:** Medium, **Type:** Functional
 
 | # | Step | Expected result |
 |---|---|---|
@@ -236,26 +236,26 @@ automated suite blocks ad domains at the network level.
 
 ### 6.5 Elements – Buttons (`/buttons`)
 
-#### TC-BT-01 · Double click
-**Priority:** High · **Type:** Functional
+#### TC-BT-01, Double click
+**Priority:** High, **Type:** Functional
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Double-click **Double Click Me** | "You have done a double click" |
 
-#### TC-BT-02 · Right click
-**Priority:** High · **Type:** Functional
+#### TC-BT-02, Right click
+**Priority:** High, **Type:** Functional
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Right-click **Right Click Me** | "You have done a right click" |
 
-#### TC-BT-03 · Single click
-**Priority:** High · **Type:** Functional
+#### TC-BT-03, Single click
+**Priority:** High, **Type:** Functional
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **Click Me** | "You have done a dynamic click" |
 
-#### TC-BT-04 · Wrong interaction gives no message
-**Priority:** Medium · **Type:** Functional (negative)
+#### TC-BT-04, Wrong interaction gives no message
+**Priority:** Medium, **Type:** Functional (negative)
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Single-click **Double Click Me** | No message appears |
@@ -266,14 +266,14 @@ automated suite blocks ad domains at the network level.
 
 ### 6.6 Elements – Links (`/links`)
 
-#### TC-LK-01 · "Home" link opens a new tab
-**Priority:** High · **Type:** Functional (multi-tab)
+#### TC-LK-01, "Home" link opens a new tab
+**Priority:** High, **Type:** Functional (multi-tab)
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **Home** | A new browser tab opens on https://demoqa.com |
 
-#### TC-LK-02 · API links show the HTTP status
-**Priority:** Medium · **Type:** Functional + network, data-driven
+#### TC-LK-02, API links show the HTTP status
+**Priority:** Medium, **Type:** Functional + network, data-driven
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **Created** | Message shows status **201** and "Created" |
@@ -284,14 +284,14 @@ automated suite blocks ad domains at the network level.
 
 ### 6.7 Elements – Upload and Download (`/upload-download`)
 
-#### TC-UD-01 · Upload a file
-**Priority:** High · **Type:** Functional
+#### TC-UD-01, Upload a file
+**Priority:** High, **Type:** Functional
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **Choose File** and pick a small file, e.g. `sample.txt` | Path shown below, ending in `sample.txt` (e.g. `C:\fakepath\sample.txt`) |
 
-#### TC-UD-02 · Download a file
-**Priority:** Medium · **Type:** Functional
+#### TC-UD-02, Download a file
+**Priority:** Medium, **Type:** Functional
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **Download** | A file (sampleFile.jpeg) is downloaded |
@@ -300,15 +300,15 @@ automated suite blocks ad domains at the network level.
 
 ### 6.8 Elements – Dynamic Properties (`/dynamic-properties`)
 
-#### TC-DP-01 · Button becomes enabled after a delay
-**Priority:** High · **Type:** UI state / waits
+#### TC-DP-01, Button becomes enabled after a delay
+**Priority:** High, **Type:** UI state / waits
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Open the page and look at **Will enable 5 seconds** straight away | Button is disabled |
 | 2 | Wait ~5 seconds | Button is enabled |
 
-#### TC-DP-02 · Button appears after a delay
-**Priority:** High · **Type:** UI state / waits
+#### TC-DP-02, Button appears after a delay
+**Priority:** High, **Type:** UI state / waits
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Open the page | **Visible After 5 Seconds** is not shown |
@@ -320,8 +320,8 @@ automated suite blocks ad domains at the network level.
 
 ### 6.9 Forms – Practice Form (`/automation-practice-form`)
 
-#### TC-PF-01 · Submit with only required fields
-**Priority:** High · **Type:** Functional (positive)
+#### TC-PF-01, Submit with only required fields
+**Priority:** High, **Type:** Functional (positive)
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Enter First Name `John`, Last Name `Smith` | – |
@@ -330,21 +330,21 @@ automated suite blocks ad domains at the network level.
 | 4 | Click **Submit** | Modal "Thanks for submitting the form" shows the entered name, gender and mobile |
 | 5 | Click **Close** | Modal closes. **Actual: fails, see DEF-002.** Escape closes it |
 
-#### TC-PF-02 · Submit with all fields (automated as part of E2E-03)
-**Priority:** High · **Type:** Functional (positive), end-to-end
+#### TC-PF-02, Submit with all fields (automated as part of E2E-03)
+**Priority:** High, **Type:** Functional (positive), end-to-end
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Fill every field: name, email, gender, mobile, date of birth (via date picker), subjects (e.g. Maths), hobbies, picture upload, address, state and city | Each control accepts input |
 | 2 | Click **Submit** | Modal summary table shows **every** value entered, in the right row |
 
-#### TC-PF-03 · Required fields are validated
-**Priority:** High · **Type:** Functional (negative)
+#### TC-PF-03, Required fields are validated
+**Priority:** High, **Type:** Functional (negative)
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **Submit** with the form empty | No modal. First Name, Last Name, Gender and Mobile are highlighted red |
 
-#### TC-PF-04 · Boundary: mobile number length
-**Priority:** High · **Type:** Boundary
+#### TC-PF-04, Boundary: mobile number length
+**Priority:** High, **Type:** Boundary
 | # | Mobile entered | Expected result |
 |---|---|---|
 | 1 | `012345678` (9 digits) | Rejected, mobile field red, no modal |
@@ -352,8 +352,8 @@ automated suite blocks ad domains at the network level.
 | 3 | `01234567890` (11 digits) | Field only accepts 10 characters (11th is not typed) |
 | 4 | `abcdefghij` | Rejected |
 
-#### TC-PF-05 · City depends on State
-**Priority:** Medium · **Type:** Functional (dependent fields)
+#### TC-PF-05, City depends on State
+**Priority:** Medium, **Type:** Functional (dependent fields)
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Before choosing a State, try to open **City** | City is disabled |
@@ -363,40 +363,40 @@ automated suite blocks ad domains at the network level.
 
 ### 6.10 Alerts, Frames & Windows
 
-#### TC-AL-01 · Simple alert
-**Priority:** High · **Type:** Functional (JS dialog) · **Page:** `/alerts`
+#### TC-AL-01, Simple alert
+**Priority:** High, **Type:** Functional (JS dialog), **Page:** `/alerts`
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click the first **Click me** button | Browser alert "You clicked a button" |
 | 2 | Click **OK** | Alert closes |
 
-#### TC-AL-02 · Delayed alert
-**Priority:** Medium · **Type:** Waits
+#### TC-AL-02, Delayed alert
+**Priority:** Medium, **Type:** Waits
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click the "alert will appear after 5 seconds" button | Alert appears after ~5 s |
 
-#### TC-AL-03 · Confirm box: OK and Cancel
-**Priority:** High · **Type:** Functional, data-driven
+#### TC-AL-03, Confirm box: OK and Cancel
+**Priority:** High, **Type:** Functional, data-driven
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click the confirm button, choose **OK** | "You selected **Ok**" |
 | 2 | Click again, choose **Cancel** | "You selected **Cancel**" |
 
-#### TC-AL-04 · Prompt box
-**Priority:** High · **Type:** Functional
+#### TC-AL-04, Prompt box
+**Priority:** High, **Type:** Functional
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click the prompt button, type `Afzal`, click **OK** | "You entered **Afzal**" |
 
-#### TC-WN-01 · New tab
-**Priority:** High · **Type:** Multi-tab · **Page:** `/browser-windows`
+#### TC-WN-01, New tab
+**Priority:** High, **Type:** Multi-tab, **Page:** `/browser-windows`
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **New Tab** | New tab opens showing "This is a sample page" |
 
-#### TC-FR-01 · Read text inside an iframe
-**Priority:** Medium · **Type:** Iframes · **Page:** `/frames`
+#### TC-FR-01, Read text inside an iframe
+**Priority:** Medium, **Type:** Iframes, **Page:** `/frames`
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Look at the first frame | It shows "This is a sample page" |
@@ -405,26 +405,26 @@ automated suite blocks ad domains at the network level.
 
 ### 6.11 Widgets and Interactions
 
-#### TC-WG-01 · Slider changes value
-**Priority:** Low · **Page:** `/slider`
+#### TC-WG-01, Slider changes value
+**Priority:** Low, **Page:** `/slider`
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Drag the slider to the right | The number box next to it shows the new value |
 
-#### TC-WG-02 · Progress bar reaches 100%
-**Priority:** Medium · **Type:** Waits · **Page:** `/progress-bar`
+#### TC-WG-02, Progress bar reaches 100%
+**Priority:** Medium, **Type:** Waits, **Page:** `/progress-bar`
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Click **Start** and wait | Bar fills to **100%** and the button changes to **Reset** |
 
-#### TC-WG-03 · Select menu (old-style native select)
-**Priority:** Medium · **Page:** `/select-menu`
+#### TC-WG-03, Select menu (old-style native select)
+**Priority:** Medium, **Page:** `/select-menu`
 | # | Step | Expected result |
 |---|---|---|
 | 1 | In **Old Style Select Menu** choose `Green` | `Green` is shown as selected |
 
-#### TC-IN-01 · Drag and drop
-**Priority:** Medium · **Page:** `/droppable`
+#### TC-IN-01, Drag and drop
+**Priority:** Medium, **Page:** `/droppable`
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Drag **Drag me** onto **Drop here** | Drop box text changes to **Dropped!** |
@@ -435,41 +435,41 @@ automated suite blocks ad domains at the network level.
 
 > Create your own test user for these. Don't reuse a real password.
 
-#### TC-BS-01 · Log in with valid credentials
-**Priority:** High · **Type:** Functional (auth) · **Page:** `/login`
+#### TC-BS-01, Log in with valid credentials
+**Priority:** High, **Type:** Functional (auth), **Page:** `/login`
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Enter a valid username and password, click **Login** | Redirected to `/profile`. Username is displayed |
 
-#### TC-BS-02 · Log in with a wrong password
-**Priority:** High · **Type:** Functional (negative)
+#### TC-BS-02, Log in with a wrong password
+**Priority:** High, **Type:** Functional (negative)
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Enter a valid username and wrong password | "Invalid username or password!" shown. Stays on login page |
 
-#### TC-BS-03 · Search the book list
-**Priority:** Medium · **Page:** `/books`
+#### TC-BS-03, Search the book list
+**Priority:** Medium, **Page:** `/books`
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Type `Git` in search | Only books whose title contains "Git" are listed |
 
-#### TC-API-01 · Get all books (API)
-**Priority:** High · **Type:** API
+#### TC-API-01, Get all books (API)
+**Priority:** High, **Type:** API
 **Tool for manual run:** browser address bar, or Postman
 | # | Step | Expected result |
 |---|---|---|
 | 1 | `GET https://demoqa.com/BookStore/v1/Books` | Status **200**. JSON with a non-empty `books` array. Each book has `isbn`, `title`, `author` |
 
-#### TC-API-02 · Create user → generate token (API)
-**Priority:** High · **Type:** API (chained requests)
+#### TC-API-02, Create user → generate token (API)
+**Priority:** High, **Type:** API (chained requests)
 | # | Step | Expected result |
 |---|---|---|
 | 1 | `POST /Account/v1/User` with a new `userName` and a strong `password` | Status **201**. Response contains `userID` |
 | 2 | `POST /Account/v1/GenerateToken` with the same credentials | Status **200**. `status: "Success"` and a `token` |
 | 3 | Repeat step 1 with the same username | Status **406**: "User exists!" |
 
-#### TC-HY-01 · Create user via API, log in via UI (hybrid)
-**Priority:** Medium · **Type:** Hybrid API + UI
+#### TC-HY-01, Create user via API, log in via UI (hybrid)
+**Priority:** Medium, **Type:** Hybrid API + UI
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Create a user with TC-API-02 | User created |
@@ -482,14 +482,14 @@ UI tests never depend on pre-existing accounts.
 
 ### 6.13 Non-functional
 
-#### TC-NF-01 · Visual check of Practice Form
-**Priority:** Low · **Type:** Visual regression
+#### TC-NF-01, Visual check of Practice Form
+**Priority:** Low, **Type:** Visual regression
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Open `/automation-practice-form` and take a screenshot | Layout looks correct. This screenshot becomes the "baseline" that later runs are compared against |
 
-#### TC-NF-02 · Accessibility basics on Text Box
-**Priority:** Low · **Type:** Accessibility
+#### TC-NF-02, Accessibility basics on Text Box
+**Priority:** Low, **Type:** Accessibility
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Use only **Tab** to move through the form and **Enter** to submit | Every field can be reached and the form can be submitted without a mouse |
@@ -501,8 +501,8 @@ UI tests never depend on pre-existing accounts.
 
 These cover complete user goals across several pages, the way a real user moves through the site.
 
-#### E2E-01 · New reader builds and manages a reading list
-**Priority:** High · **Type:** End-to-end, hybrid (user created via API)
+#### E2E-01, New reader builds and manages a reading list
+**Priority:** High, **Type:** End-to-end, hybrid (user created via API)
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Log in with a newly registered account | Profile page shows the username and an empty collection |
@@ -514,16 +514,16 @@ These cover complete user goals across several pages, the way a real user moves 
 | 7 | Check the account through the API | API also reports no books |
 | 8 | Click **Logout**, then open `/profile` | Redirected to Login; Profile says the user is not logged in |
 
-#### E2E-02 · Returning reader sees books added elsewhere
-**Priority:** Medium · **Type:** End-to-end, session created via API
+#### E2E-02, Returning reader sees books added elsewhere
+**Priority:** Medium, **Type:** End-to-end, session created via API
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Add two books to the account through the API | HTTP 201 |
 | 2 | Open `/profile` with an API-created session (no login form) | Username and both books are shown |
 | 3 | Click delete on one book, then **Cancel** | Dialog closes, both books remain |
 
-#### E2E-03 · Student finds the registration form and enrols
-**Priority:** High · **Type:** End-to-end
+#### E2E-03, Student finds the registration form and enrols
+**Priority:** High, **Type:** End-to-end
 | # | Step | Expected result |
 |---|---|---|
 | 1 | From the home page click **Forms**, then **Practice Form** in the side menu | Practice Form opens |
@@ -531,8 +531,8 @@ These cover complete user goals across several pages, the way a real user moves 
 | 3 | Check the summary table | Every value matches what was entered |
 | 4 | Press Escape | Modal closes |
 
-#### E2E-04 · HR manages an employee record from start to finish
-**Priority:** High · **Type:** End-to-end, CRUD
+#### E2E-04, HR manages an employee record from start to finish
+**Priority:** High, **Type:** End-to-end, CRUD
 | # | Step | Expected result |
 |---|---|---|
 | 1 | Add a new employee | New row appears with every value |
