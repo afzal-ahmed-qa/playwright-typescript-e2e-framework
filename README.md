@@ -19,6 +19,7 @@ I've also written a separate set of manual test plans for an e-commerce site and
 that side of testing is more relevant to you:
 [manual-test-plans-ecommerce](https://github.com/afzal-ahmed-qa/manual-test-plans-ecommerce).
 My Postman/Newman work is in
+[toolshop-api-tests-postman](https://github.com/afzal-ahmed-qa/toolshop-api-tests-postman) and
 [petstore-api-tests-postman](https://github.com/afzal-ahmed-qa/petstore-api-tests-postman).
 
 ## What's tested
